@@ -5,17 +5,18 @@ import com.github.gmazzo.buildconfig.BuildConfigExtension;
 import net.neoforged.moddevgradle.dsl.NeoForgeExtension;
 import net.neoforged.moddevgradle.dsl.RunModel;
 import org.gradle.api.Action;
+import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.BasePluginExtension;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.provider.Property;
+import org.gradle.language.jvm.tasks.ProcessResources;
 
 import javax.inject.Inject;
 import java.util.Optional;
 import java.util.Set;
 
 public abstract class AlmostGradleExtension {
-    public static final String DEFAULT_PACKAGE_DOMAIN = "com.almostreliable";
     public static final String NAME = "almostgradle";
 
     private final Project project;
@@ -25,11 +26,19 @@ public abstract class AlmostGradleExtension {
     public AlmostGradleExtension(Project project) {
         this.project = project;
         this.recipeViewers = project.getObjects().newInstance(RecipeViewers.class);
+
         getResizeClient().set(false);
         getTestMod().convention(false);
         getDataGen().convention(false);
-        getBuildConfig().convention(false);
+
+        getWithSourcesJar().convention(true);
+        getBuildConfig().convention(true);
+        getProcessResources().set(true);
     }
+
+    public abstract Property<Boolean> getProcessResources();
+
+    public abstract Property<Boolean> getWithSourcesJar();
 
     public abstract Property<Boolean> getResizeClient();
 
@@ -71,7 +80,7 @@ public abstract class AlmostGradleExtension {
         onSetup.execute(this);
         log("📕Setting up project through AlmostGradle plugin...");
 
-        defineBasics();
+        applyBasics();
         Utils.log(project, "\t* Project Version", project.getVersion());
         Utils.log(project, "\t* Project Group", project.getGroup());
         Utils.log(project, "\t* Minecraft Version", getMinecraftVersion());
@@ -79,11 +88,21 @@ public abstract class AlmostGradleExtension {
         Utils.log(project, "\t* Mod Name", getModName());
         Utils.log(project, "\t* Mod Version", getModVersion());
 
+        createProcessResourcesTask();
         applyBuildConfig();
         applyBasicMod();
         applyTestMod();
         getRecipeViewers().createRuns();
         onPostRunConfigs();
+    }
+
+    private void createProcessResourcesTask() {
+        if (getProcessResources().get()) {
+            project
+                    .getTasks()
+                    .named("processResources", ProcessResources.class)
+                    .configure(new ProcessResourceHandler(project));
+        }
     }
 
     private void onPostRunConfigs() {
@@ -135,9 +154,9 @@ public abstract class AlmostGradleExtension {
         }
     }
 
-    private void defineBasics() {
+    private void applyBasics() {
         if (project.getGroup().toString().isEmpty()) {
-            project.setGroup(DEFAULT_PACKAGE_DOMAIN + ".mods");
+            throw new GradleException("Project group cannot be empty!");
         }
 
         String v = project.getVersion().toString();
@@ -147,6 +166,11 @@ public abstract class AlmostGradleExtension {
 
         BasePluginExtension base = project.getExtensions().getByType(BasePluginExtension.class);
         base.getArchivesName().set(getModId() + "-neoforge");
+
+        if (getWithSourcesJar().get()) {
+            var javaPlugin = project.getExtensions().getByType(JavaPluginExtension.class);
+            javaPlugin.withSourcesJar();
+        }
     }
 
     private void applyBuildConfig() {
@@ -170,11 +194,18 @@ public abstract class AlmostGradleExtension {
 
             Object packageName = project.findProperty(NAME + ".buildconfig.package");
             if (packageName == null) {
-                packageName = DEFAULT_PACKAGE_DOMAIN + "." + this.getModId();
+                packageName = project.getGroup() + "." + getModId();
             }
 
             buildConfig.packageName(packageName.toString());
-            log("📕Applied buildconfig output under package name: " + packageName);
+
+            Object className = project.findProperty(NAME + ".buildconfig.name");
+            if (className != null) {
+                buildConfig.className(className.toString());
+            }
+
+            log("📕Applied buildconfig output under: " + packageName +
+                (className == null ? ".BuildConfig" : "." + className));
         } catch (Exception e) {
             project.getLogger().error("... Failed to apply buildconfig", e);
         }

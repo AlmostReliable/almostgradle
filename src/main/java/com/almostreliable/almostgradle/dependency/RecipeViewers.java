@@ -102,13 +102,13 @@ public abstract class RecipeViewers {
                 run.getSourceSet().set(sourceSet);
             });
 
-            var config = Utils.createLocalRuntimeOnly(project,
+            var config = Utils.createLocalRuntime(project,
                     sourceSet.getRuntimeClasspathConfigurationName(),
                     mod.id());
             config.withDependencies(d -> d.addLater(dep));
         }
 
-        var runtimeOnly = project.getConfigurations().getByName("localRuntimeOnly");
+        var runtimeOnly = project.getConfigurations().getByName("localRuntime");
         runtimeOnly.resolutionStrategy(ResolutionStrategy::failOnVersionConflict);
         var compileOnly = project.getConfigurations().getByName(mainSourceSet.getCompileOnlyConfigurationName());
         compileOnly.resolutionStrategy(ResolutionStrategy::failOnVersionConflict);
@@ -119,7 +119,6 @@ public abstract class RecipeViewers {
             }
             case FULL -> {
                 compileOnly.withDependencies(d -> d.addLater(dep));
-                runtimeOnly.withDependencies(d -> d.addLater(dep));
             }
         }
     }

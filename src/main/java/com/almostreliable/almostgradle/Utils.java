@@ -26,8 +26,8 @@ public class Utils {
         return true;
     }
 
-    public static Configuration createLocalRuntimeOnly(Project project, String classPathConfigName, @Nullable String prefix) {
-        String name = prefix == null ? "localRuntimeOnly" : prefix + "LocalRuntimeOnly";
+    public static Configuration createLocalRuntime(Project project, String classPathConfigName, @Nullable String prefix) {
+        String name = prefix == null ? "localRuntime" : prefix + "LocalRuntime";
         return project.getConfigurations().create(name, c -> {
             c.setVisible(true);
             c.setCanBeResolved(true);
