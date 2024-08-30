@@ -31,6 +31,10 @@ gradlePlugin {
     }
 }
 
+tasks.withType<Javadoc> {
+    (options as CoreJavadocOptions).addStringOption("Xdoclint:all,-missing", "-quiet")
+}
+
 buildscript {
     dependencies {
         classpath("net.neoforged:moddev-gradle:2.0.19-beta")

@@ -116,10 +116,6 @@ the `gradle.properties`. So `${modId}` will be replaced with the value of `modId
 
 If a key is missing, it will throw an exception.
 
-#### Resize Client
-
-Default to `false`. When activating, all client run configs will be resized to `1920x1080`, when starting the game.
-
 #### Sources Jar
 
 Default to `true`. Will create a sources jar for the mod on build.
@@ -223,3 +219,90 @@ dependency {
     compileOnly(almostgradle.recipeViewers.emi.apiDependency)
 }
 ```
+
+### Launch Args
+
+#### Resize Client
+
+Default to `false`. When activating, all client run configs will be resized to `1920x1080`, when starting the game.
+
+#### `build.gradle`
+
+```kts
+almostgradle.setup {
+    // other stuff
+    launchArgs {
+        resizeClient = true
+    }
+}
+```
+
+#### `gradle.properties`
+
+````properties
+almostgradle.launchArgs.resizeClient=true
+````
+
+#### Auto World Join
+
+Default to `false`. When activating, the game will automatically join the world when starting the game. The value can be
+either `true`, `false` or a world name.
+
+#### `build.gradle`
+
+```kts
+almostgradle.setup {
+    // other stuff
+    launchArgs {
+        autoWorldJoin = true
+    }
+}
+```
+
+#### `gradle.properties`
+
+````properties
+almostgradle.launchArgs.autoWorldJoin=true
+````
+
+### Logging Level
+
+Default to `DEBUG`. Will set the logging level for the mod.
+
+#### `build.gradle`
+
+```kts
+almostgradle.setup {
+    // other stuff
+    launchArgs {
+        loggingLevel = "INFO"
+    }
+}
+```
+
+#### `gradle.properties`
+
+````properties
+almostgradle.launchArgs.loggingLevel=INFO
+````
+
+### Mixin Debug Output
+
+Default to `false`. Will set the Mixin debug for the mod.
+
+#### `build.gradle`
+
+```kts
+almostgradle.setup {
+    // other stuff
+    launchArgs {
+        mixinDebugOutput = true
+    }
+}
+```
+
+#### `gradle.properties`
+
+````properties
+almostgradle.launchArgs.mixinDebugOutput=true
+````

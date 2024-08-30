@@ -3,7 +3,6 @@ package com.almostreliable.almostgradle;
 import com.almostreliable.almostgradle.dependency.RecipeViewers;
 import com.github.gmazzo.buildconfig.BuildConfigExtension;
 import net.neoforged.moddevgradle.dsl.NeoForgeExtension;
-import net.neoforged.moddevgradle.dsl.RunModel;
 import org.gradle.api.Action;
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
@@ -21,13 +20,14 @@ public abstract class AlmostGradleExtension {
 
     private final Project project;
     private final RecipeViewers recipeViewers;
+    private final LaunchArgs launchArgs;
 
     @Inject
     public AlmostGradleExtension(Project project) {
         this.project = project;
         this.recipeViewers = project.getObjects().newInstance(RecipeViewers.class);
+        this.launchArgs = project.getObjects().newInstance(LaunchArgs.class);
 
-        getResizeClient().set(false);
         getTestMod().convention(false);
         getDataGen().convention(false);
 
@@ -39,8 +39,6 @@ public abstract class AlmostGradleExtension {
     public abstract Property<Boolean> getProcessResources();
 
     public abstract Property<Boolean> getWithSourcesJar();
-
-    public abstract Property<Boolean> getResizeClient();
 
     public abstract Property<Boolean> getTestMod();
 
@@ -54,6 +52,14 @@ public abstract class AlmostGradleExtension {
 
     public void recipeViewers(Action<RecipeViewers> action) {
         action.execute(recipeViewers);
+    }
+
+    public LaunchArgs getLaunchArgs() {
+        return launchArgs;
+    }
+
+    public void launchArgs(Action<LaunchArgs> action) {
+        action.execute(launchArgs);
     }
 
     public String getNeoforgeVersion() {
@@ -109,18 +115,9 @@ public abstract class AlmostGradleExtension {
         log("📕Generated run configs:");
         var neoForge = project.getExtensions().getByType(NeoForgeExtension.class);
         neoForge.getRuns().forEach(run -> {
-            applyRunArguments(run);
+            launchArgs.applyRunArguments(run);
             log("\t* " + run.getIdeName().get());
         });
-    }
-
-    public void applyRunArguments(RunModel run) {
-        run.jvmArgument("-XX:+IgnoreUnrecognizedVMOptions");
-        run.jvmArgument("-XX:+AllowEnhancedClassRedefinition");
-
-        if (run.getType().get().equals("client") && getResizeClient().get()) {
-            run.getProgramArguments().addAll("--width", "1920", "--height", "1080");
-        }
     }
 
     private void applyBasicMod() {
