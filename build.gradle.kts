@@ -1,4 +1,6 @@
-group = "com.almostreliable.plugin"
+@file:Suppress("UnstableApiUsage")
+
+group = "com.almostreliable"
 version = "1.0"
 
 
@@ -6,6 +8,7 @@ plugins {
     id("java")
     id("java-gradle-plugin")
     id("maven-publish")
+    id("com.gradle.plugin-publish") version "1.2.2"
 }
 
 allprojects {
@@ -16,9 +19,13 @@ allprojects {
 }
 
 gradlePlugin {
+    website = "https://almostreliable.com"
+    vcsUrl = "https://github.com/AlmostReliable/almostgradle.git"
     plugins {
-        create("almostGradle") {
+        create("almostgradle") {
             id = "com.almostreliable.almostgradle"
+            displayName = "AlmostGradle"
+            description = "Utility plugin for modding in Minecraft"
             implementationClass = "com.almostreliable.almostgradle.AlmostGradlePlugin"
         }
     }
