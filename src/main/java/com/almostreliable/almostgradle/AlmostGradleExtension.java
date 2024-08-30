@@ -3,6 +3,7 @@ package com.almostreliable.almostgradle;
 import com.almostreliable.almostgradle.dependency.RecipeViewers;
 import com.github.gmazzo.buildconfig.BuildConfigExtension;
 import net.neoforged.moddevgradle.dsl.NeoForgeExtension;
+import net.neoforged.moddevgradle.dsl.RunModel;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.BasePluginExtension;
@@ -24,10 +25,13 @@ public abstract class AlmostGradleExtension {
     public AlmostGradleExtension(Project project) {
         this.project = project;
         this.recipeViewers = project.getObjects().newInstance(RecipeViewers.class);
+        getResizeClient().set(false);
         getTestMod().convention(false);
         getDataGen().convention(false);
         getBuildConfig().convention(false);
     }
+
+    public abstract Property<Boolean> getResizeClient();
 
     public abstract Property<Boolean> getTestMod();
 
@@ -65,7 +69,7 @@ public abstract class AlmostGradleExtension {
 
     public void setup(Action<AlmostGradleExtension> onSetup) {
         onSetup.execute(this);
-        log("📕Setup project through AlmostGradle Plugin...");
+        log("📕Setting up project through AlmostGradle plugin...");
 
         defineBasics();
         Utils.log(project, "\t* Project Version", project.getVersion());
@@ -79,6 +83,25 @@ public abstract class AlmostGradleExtension {
         applyBasicMod();
         applyTestMod();
         getRecipeViewers().createRuns();
+        onPostRunConfigs();
+    }
+
+    private void onPostRunConfigs() {
+        log("📕Generated run configs:");
+        var neoForge = project.getExtensions().getByType(NeoForgeExtension.class);
+        neoForge.getRuns().forEach(run -> {
+            applyRunArguments(run);
+            log("\t* " + run.getIdeName().get());
+        });
+    }
+
+    public void applyRunArguments(RunModel run) {
+        run.jvmArgument("-XX:+IgnoreUnrecognizedVMOptions");
+        run.jvmArgument("-XX:+AllowEnhancedClassRedefinition");
+
+        if (run.getType().get().equals("client") && getResizeClient().get()) {
+            run.getProgramArguments().addAll("--width", "1920", "--height", "1080");
+        }
     }
 
     private void applyBasicMod() {
@@ -92,19 +115,16 @@ public abstract class AlmostGradleExtension {
         neoForge.getRuns().create("client", (run) -> {
             run.client();
             run.getMods().set(Set.of(mainMod));
-            Utils.writeRunArguments(run);
         });
         neoForge.getRuns().create("server", (run) -> {
             run.server();
             run.getMods().set(Set.of(mainMod));
-            Utils.writeRunArguments(run);
         });
 
         if (getDataGen().get()) {
             neoForge.getRuns().create("datagen", (run) -> {
                 run.data();
                 run.getMods().set(Set.of(mainMod));
-                Utils.writeRunArguments(run);
                 run.getProgramArguments().addAll(
                         "--mod", getModId(),
                         "--all",
@@ -184,7 +204,6 @@ public abstract class AlmostGradleExtension {
                 run.systemProperty("neoforge.gameTestServer", "true");
                 run.systemProperty("neoforge.enabledGameTestNamespaces", modId);
                 run.systemProperty(modId + ".example_scripts", exampleScripts);
-                Utils.writeRunArguments(run);
             });
             runs.create("testmod", (run) -> {
                 run.client();
@@ -192,7 +211,6 @@ public abstract class AlmostGradleExtension {
                 run.systemProperty("neoforge.gameTestServer", "true");
                 run.systemProperty("neoforge.enabledGameTestNamespaces", modId);
                 run.systemProperty(modId + ".example_scripts", exampleScripts);
-                Utils.writeRunArguments(run);
             });
         });
     }

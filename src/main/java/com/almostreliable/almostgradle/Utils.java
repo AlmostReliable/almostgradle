@@ -1,6 +1,5 @@
 package com.almostreliable.almostgradle;
 
-import net.neoforged.moddevgradle.dsl.RunModel;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
@@ -11,15 +10,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 public class Utils {
-
-    public static void writeRunArguments(RunModel run) {
-        run.jvmArgument("-XX:+IgnoreUnrecognizedVMOptions");
-        run.jvmArgument("-XX:+AllowEnhancedClassRedefinition");
-
-        if (run.getType().get().equals("client")) {
-            run.getProgramArguments().addAll("--width", "1920", "--height", "1080");
-        }
-    }
 
     public static boolean isMissingMavenRepository(Project project, String repository) {
         try {

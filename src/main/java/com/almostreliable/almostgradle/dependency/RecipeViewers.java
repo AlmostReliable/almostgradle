@@ -100,7 +100,6 @@ public abstract class RecipeViewers {
                 run.getIdeName().set("RecipeViewer (" + mod.id().toUpperCase() + ")");
                 run.client();
                 run.getSourceSet().set(sourceSet);
-                Utils.writeRunArguments(run);
             });
 
             var config = Utils.createLocalRuntimeOnly(project,

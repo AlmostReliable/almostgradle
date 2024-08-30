@@ -14,7 +14,6 @@ public class AlmostGradlePlugin implements Plugin<Project> {
         project.getPlugins().apply(JavaPlugin.class);
         project.getPlugins().apply(MavenPublishPlugin.class);
 
-
         Utils.createLocalRuntimeOnly(project, JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME, null);
         Utils.createLocalRuntimeOnly(project, JavaPlugin.TEST_RUNTIME_CLASSPATH_CONFIGURATION_NAME, "test");
 
