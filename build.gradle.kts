@@ -1,8 +1,7 @@
 @file:Suppress("UnstableApiUsage")
 
 group = "com.almostreliable"
-version = "1.0"
-
+version = "1.0.0"
 
 plugins {
     id("java")
