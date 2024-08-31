@@ -1,0 +1,350 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_version:
+        type: string
+        required: false
+        description: "version | empty = next option"
+      update_type:
+        type: choice
+        required: false
+        description: "update type"
+        default: "minor"
+        options:
+          - "major"
+          - "minor"
+          - "patch"
+          - "none"
+
+jobs:
+  preparation:
+    name: Preparation
+    runs-on: ubuntu-latest
+    outputs:
+      VERSION: ${{ steps.version.outputs.VERSION }}
+      NEEDS_COMMIT: ${{ steps.commit_info.outputs.NEEDS_COMMIT }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check secrets
+        run: |
+          if [ -z "${{ secrets.GRADLE_KEY }}" ]; then
+            echo "GRADLE_KEY is not set"
+            exit 1
+          fi
+          if [ -z "${{ secrets.GRADLE_SECRET }}" ]; then
+            echo "GRADLE_SECRET is not set"
+            exit 1
+          fi
+
+      - name: Compute version
+        id: version
+        env:
+          TARGET_VERSION: ${{ inputs.target_version }}
+          UPDATE_TYPE: ${{ inputs.update_type }}
+        run: |
+          echo "getting current version"
+          CURRENT_VERSION=$(grep -oP '^version\s*=\s*\K"[^"]*' build.gradle.kts)
+          echo "detected current version: $CURRENT_VERSION"
+
+          if [[ -z "$CURRENT_VERSION" ]]; then
+            echo "no current version found"
+            exit 1
+          fi
+
+          if [[ -z "$TARGET_VERSION" ]]; then
+            echo "no target version provided, evaluating new version from update type: $UPDATE_TYPE"
+            case "$UPDATE_TYPE" in
+              major)
+                NEW_VERSION=$(echo $CURRENT_VERSION | awk -F. '{$1++; print $1".0.0"}')
+                ;;
+              minor)
+                NEW_VERSION=$(echo $CURRENT_VERSION | awk -F. '{$2++; print $1"."$2".0"}')
+                ;;
+              patch)
+                NEW_VERSION=$(echo $CURRENT_VERSION | awk -F. '{$3++; print $1"."$2"."$3}')
+                ;;
+              none)
+                NEW_VERSION=$CURRENT_VERSION
+                ;;
+            esac
+          else
+            echo "setting new version from target version: $TARGET_VERSION"
+            NEW_VERSION=$TARGET_VERSION
+          fi
+
+          if ! [[ $NEW_VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "invalid new version: $NEW_VERSION"
+            exit 1
+          fi
+
+          echo "using new version: $NEW_VERSION"
+          echo "VERSION=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Adjust version
+        env:
+          VERSION: ${{ steps.version.outputs.VERSION }}
+        run: |
+          if grep -q '^version\s*=\s*"$VERSION"' gradle.properties; then
+            echo "version is already set"
+          else
+            echo "version is outdated, adjusting build.gradle.kts"
+            sed -i 's/^version\s*=.*$/version = "$VERSION"/' build.gradle.kts
+            git diff build.gradle.kts
+          fi
+
+      - name: Check and adjust changelog
+        env:
+          VERSION: ${{ steps.version.outputs.VERSION }}
+        run: |
+          if grep -qF "## Unreleased" CHANGELOG.md; then
+            echo "unreleased changelog entry found, adjusting header"
+            sed -i "s/^## Unreleased.*/## [$VERSION] - $(date +%F)/" CHANGELOG.md
+          elif grep -qF "## [$VERSION]" CHANGELOG.md; then
+            echo "existing changelog entry found for version $VERSION"
+          else
+            echo "no unreleased changelog entry found or entry for version $VERSION"
+            exit 1
+          fi
+
+          if ! grep -qF "[$VERSION]: https://" CHANGELOG.md; then
+            echo "adding changelog link for version $VERSION"
+            awk -v n="[$VERSION]: https://github.com/$GITHUB_REPOSITORY/releases/tag/v$VERSION" '/^\[[0-9]+\.[0-9]+\.[0-9]+\]: https:\/\// && !inserted {print n; inserted=1}1' CHANGELOG.md > temp && mv temp CHANGELOG.md
+          fi
+
+          sed -i "/^## \[$VERSION\]/i ## Unreleased\n- /\n" CHANGELOG.md
+
+          git diff CHANGELOG.md
+
+      - name: Store commit info
+        id: commit_info
+        run: |
+          if [[ -n $(git diff --name-only build.gradle.kts CHANGELOG.md) ]]; then
+            NEEDS_COMMIT="true"
+          else
+            NEEDS_COMMIT="false"
+          fi
+
+          echo "NEEDS_COMMIT=$NEEDS_COMMIT" >> $GITHUB_OUTPUT
+
+      - name: Archive results
+        run: tar -zcvf preparation.tar.gz build.gradle.kts CHANGELOG.md
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: preparation-artifacts
+          path: preparation.tar.gz
+          if-no-files-found: error
+          retention-days: 3
+
+  build:
+    name: Build
+    needs: preparation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Checkout compound action
+        uses: actions/checkout@v4
+        with:
+          repository: AlmostReliable/.github
+          path: repo
+
+      - name: Move compound action
+        run: |
+          mv repo/.github/actions .github/actions
+          rm -rf repo
+
+      - name: Download preparation artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: preparation-artifacts
+
+      - name: Extract preparation artifacts
+        run: tar -zxvf preparation.tar.gz
+
+      - name: Setup Java and Gradle
+        uses: ./.github/actions/gradle-java
+        with:
+          java-distribution: "microsoft"
+          java-version: "21"
+          branch: ${{ github.event_name == 'pull_request' && 'read_only' || github.ref }}
+
+      - name: Assemble the JAR
+        run: ./gradlew assemble
+
+      - name: Move JARs to central directory
+        run: |
+          mkdir output
+          mv -f build/libs/*.jar output/
+          rm -f output/*-sources.jar
+
+      - name: Install changelog parser
+        uses: taiki-e/install-action@v2
+        with:
+          tool: parse-changelog
+
+      - name: Parse changelog
+        env:
+          VERSION: ${{ needs.preparation.outputs.VERSION }}
+        run: |
+          parse-changelog CHANGELOG.md "$VERSION" > output/changelog.md
+          if [ ! -s output/changelog.md ]; then
+            echo "Changelog is empty"
+            exit 1
+          fi
+
+      - name: Archive results
+        run: tar -zcvf build.tar.gz output
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: build.tar.gz
+          if-no-files-found: error
+          retention-days: 3
+
+      - name: Job Summary
+        env:
+          TARGET_VERSION: ${{ inputs.target_version }}
+          UPDATE_TYPE: ${{ inputs.update_type }}
+          VERSION: ${{ needs.preparation.outputs.VERSION }}
+        run: |
+          add_head() {
+            echo "## $1" >> $GITHUB_STEP_SUMMARY
+          }
+          add_line() {
+            echo "- $1" >> $GITHUB_STEP_SUMMARY
+          }
+          blank_line() {
+            echo "" >> $GITHUB_STEP_SUMMARY
+          }
+
+          if [ "$TARGET_VERSION" = "" ]; then
+            TARGET_VERSION="none"
+          fi
+          if [ "$TARGET_VERSION" = "none" ]; then
+            UPDATE=$UPDATE_TYPE
+          else
+            UPDATE="ignored"
+          fi
+
+          add_head "Inputs"
+          blank_line
+          add_line "Version: $VERSION"
+          add_line "Update Type: $UPDATE"
+          blank_line
+          add_head "Preparation Information"
+          blank_line
+          add_line "New Version: $VERSION"
+          blank_line
+          add_head "Build Information"
+          blank_line
+          add_line "JAR files: $(find output -maxdepth 1 -type f -name '*.jar' | wc -l)"
+          add_line "Folder size: $(du -sh output | cut -f1)"
+          add_line "Archive size: $(du -sh build.tar.gz | cut -f1)"
+          blank_line
+          add_head "Changelog"
+          blank_line
+          cat output/changelog.md >> $GITHUB_STEP_SUMMARY
+          blank_line
+          add_head "Gradle Summary"
+
+  commit:
+    name: Commit changes
+    if: ${{ needs.preparation.outputs.NEEDS_COMMIT == 'true' }}
+    needs:
+      - preparation
+      - build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download preparation artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: preparation-artifacts
+
+      - name: Extract preparation artifacts
+        run: tar -zxvf preparation.tar.gz
+
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v5.0.0
+        with:
+          commit_message: "bump version"
+          commit_user_name: "AlmostReliable"
+          file_pattern: "build.gradle.kts CHANGELOG.md"
+
+  plugin-portal-release:
+    name: Plugin Portal Release
+    needs:
+      - preparation
+      - build
+      - commit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Checkout compound action
+        uses: actions/checkout@v4
+        with:
+          repository: AlmostReliable/.github
+          path: repo
+
+      - name: Move compound action
+        run: |
+          mv repo/.github/actions .github/actions
+          rm -rf repo
+
+      - name: Setup Java and Gradle
+        uses: ./.github/actions/gradle-java
+        with:
+          java-distribution: "microsoft"
+          java-version: "21"
+          branch: ${{ github.event_name == 'pull_request' && 'read_only' || github.ref }}
+
+      - name: Release
+        env:
+          GRADLE_PUBLISH_KEY: ${{ secrets.GRADLE_KEY }}
+          GRADLE_PUBLISH_SECRET: ${{ secrets.GRADLE_SECRET }}
+        run: |
+          ./gradlew -Dgradle.publish.key=$GRADLE_PUBLISH_KEY -Dgradle.publish.secret=$GRADLE_PUBLISH_SECRET publishPlugins
+
+  github-release:
+    name: GitHub Release
+    needs:
+      - preparation
+      - commit
+      - build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+
+      - name: Extract build artifacts
+        run: tar -zxvf build.tar.gz
+
+      - name: Release on GitHub
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-tag: v${{ needs.preparation.outputs.VERSION }}
+          github-commitish: ${{ github.ref }}
+          files: output/*.jar
+          name: v${{ needs.preparation.outputs.VERSION }}
+          version: ${{ needs.preparation.outputs.VERSION }}
+          changelog-file: output/changelog.md
