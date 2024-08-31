@@ -4,9 +4,6 @@ group = "com.almostreliable"
 version = "1.0.0"
 
 plugins {
-    id("java")
-    id("java-gradle-plugin")
-    id("maven-publish")
     id("com.gradle.plugin-publish") version "1.2.2"
 }
 
@@ -41,12 +38,4 @@ buildscript {
 dependencies {
     compileOnly("net.neoforged:moddev-gradle:2.0.+")
     implementation("com.github.gmazzo.buildconfig:plugin:5.4.0")
-}
-
-publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            from(components["java"])
-        }
-    }
 }
