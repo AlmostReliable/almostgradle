@@ -20,8 +20,15 @@ gradlePlugin {
     }
 }
 
-tasks.withType<Javadoc> {
-    (options as CoreJavadocOptions).addStringOption("Xdoclint:all,-missing", "-quiet")
+tasks {
+    withType<Jar> {
+        if (name == "javadocJar") {
+            enabled = false
+        }
+    }
+    withType<Javadoc> {
+        enabled = false
+    }
 }
 
 repositories {
