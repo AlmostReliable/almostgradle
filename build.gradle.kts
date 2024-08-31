@@ -10,13 +10,6 @@ plugins {
     id("com.gradle.plugin-publish") version "1.2.2"
 }
 
-allprojects {
-    repositories {
-        maven("https://plugins.gradle.org/m2/")
-        mavenCentral()
-    }
-}
-
 gradlePlugin {
     website = "https://almostreliable.com"
     vcsUrl = "https://github.com/AlmostReliable/almostgradle.git"
@@ -32,6 +25,10 @@ gradlePlugin {
 
 tasks.withType<Javadoc> {
     (options as CoreJavadocOptions).addStringOption("Xdoclint:all,-missing", "-quiet")
+}
+
+repositories {
+    gradlePluginPortal()
 }
 
 buildscript {
