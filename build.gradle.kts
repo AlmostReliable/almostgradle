@@ -14,8 +14,9 @@ gradlePlugin {
         create(project.name) {
             id = "${project.group}.${project.name}"
             displayName = "AlmostGradle"
-            description = "Utility plugin for modding in Minecraft"
+            description = "A utility plugin to set up a NeoForge mod using ModDevGradle."
             implementationClass = "${project.group}.${project.name}.AlmostGradlePlugin"
+            tags.set(listOf("minecraft", "modding", "moddevgradle", "utility"))
         }
     }
 }
