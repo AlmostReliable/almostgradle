@@ -21,11 +21,11 @@ gradlePlugin {
     website = "https://almostreliable.com"
     vcsUrl = "https://github.com/AlmostReliable/almostgradle.git"
     plugins {
-        create("almostgradle") {
-            id = "com.almostreliable.almostgradle"
+        create(project.name) {
+            id = "${project.group}.${project.name}"
             displayName = "AlmostGradle"
             description = "Utility plugin for modding in Minecraft"
-            implementationClass = "com.almostreliable.almostgradle.AlmostGradlePlugin"
+            implementationClass = "${project.group}.${project.name}.AlmostGradlePlugin"
         }
     }
 }
