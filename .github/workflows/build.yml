@@ -1,0 +1,33 @@
+name: Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "main"
+    tags-ignore:
+      - "**"
+    paths:
+      - "gradle/**"
+      - "**.java"
+      - "**.kts"
+      - "**/build.yml"
+  pull_request:
+    branches:
+      - "main"
+    paths:
+      - "gradle/**"
+      - "**.java"
+      - "**.kts"
+      - "**/build.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  redirect:
+    uses: AlmostReliable/.github/.github/workflows/build.yml@main
+    with:
+      java-distribution: "microsoft"
+      java-version: "21"
