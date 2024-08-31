@@ -2,6 +2,7 @@ package com.almostreliable.almostgradle;
 
 import com.almostreliable.almostgradle.dependency.RecipeViewers;
 import com.github.gmazzo.buildconfig.BuildConfigExtension;
+import net.neoforged.moddevgradle.dsl.ModModel;
 import net.neoforged.moddevgradle.dsl.NeoForgeExtension;
 import org.gradle.api.Action;
 import org.gradle.api.GradleException;
@@ -9,6 +10,7 @@ import org.gradle.api.Project;
 import org.gradle.api.plugins.BasePluginExtension;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.provider.Property;
+import org.gradle.api.tasks.SourceSet;
 import org.gradle.language.jvm.tasks.ProcessResources;
 
 import javax.inject.Inject;
@@ -27,9 +29,14 @@ public abstract class AlmostGradleExtension {
         this.project = project;
         this.recipeViewers = project.getObjects().newInstance(RecipeViewers.class);
         this.launchArgs = project.getObjects().newInstance(LaunchArgs.class);
+        var providers = project.getProviders();
 
         getTestMod().convention(false);
-        getDataGen().convention(false);
+        getDataGen().set(providers.gradleProperty("datagen").map(s -> {
+            if (s.equals("true")) return true;
+            if (s.equals("false")) return false;
+            return s;
+        }).orElse(false));
 
         getWithSourcesJar().convention(true);
         getBuildConfig().convention(true);
@@ -44,7 +51,7 @@ public abstract class AlmostGradleExtension {
 
     public abstract Property<Boolean> getBuildConfig();
 
-    public abstract Property<Boolean> getDataGen();
+    public abstract Property<Object> getDataGen();
 
     public RecipeViewers getRecipeViewers() {
         return recipeViewers;
@@ -137,22 +144,36 @@ public abstract class AlmostGradleExtension {
             run.getMods().set(Set.of(mainMod));
         });
 
-        if (getDataGen().get()) {
-            mainSourceSet.resources(sourceSet -> {
-                sourceSet.srcDir("src/generated/resources");
-                sourceSet.exclude("**/.cache/**");
-            });
-            neoForge.getRuns().create("datagen", (run) -> {
-                run.data();
-                run.getMods().set(Set.of(mainMod));
-                run.getProgramArguments().addAll(
-                        "--mod", getModId(),
-                        "--all",
-                        "--output", project.file("src/generated/resources").getAbsolutePath(),
-                        "--existing", project.file("src/main/resources").getAbsolutePath()
-                );
-            });
+        applyDataGen(neoForge, mainMod, mainSourceSet);
+    }
+
+    private void applyDataGen(NeoForgeExtension neoForge, ModModel mainMod, SourceSet mainSourceSet) {
+        Object o = getDataGen().get();
+
+        String generatedPath;
+        if (o instanceof Boolean b) {
+            if (!b) return;
+            generatedPath = "src/generated/resources";
+        } else if (o instanceof String s) {
+            generatedPath = s;
+        } else {
+            generatedPath = "";
         }
+
+        mainSourceSet.resources(sourceSet -> {
+            sourceSet.srcDir(generatedPath);
+            sourceSet.exclude("**/.cache/**");
+        });
+        neoForge.getRuns().create("datagen", (run) -> {
+            run.data();
+            run.getMods().set(Set.of(mainMod));
+            run.getProgramArguments().addAll(
+                    "--mod", getModId(),
+                    "--all",
+                    "--output", project.file(generatedPath).getAbsolutePath(),
+                    "--existing", project.file("src/main/resources").getAbsolutePath()
+            );
+        });
     }
 
     private void applyBasics() {
