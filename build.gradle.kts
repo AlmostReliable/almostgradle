@@ -36,14 +36,13 @@ tasks.withType<Javadoc> {
 
 buildscript {
     dependencies {
-        classpath("net.neoforged:moddev-gradle:2.0.19-beta")
+        classpath("net.neoforged:moddev-gradle:2.0.+")
         classpath("com.github.gmazzo.buildconfig:plugin:5.4.0")
     }
-
 }
 
 dependencies {
-    compileOnly("net.neoforged:moddev-gradle:2.0.19-beta")
+    compileOnly("net.neoforged:moddev-gradle:2.0.+")
     implementation("com.github.gmazzo.buildconfig:plugin:5.4.0")
 }
 
