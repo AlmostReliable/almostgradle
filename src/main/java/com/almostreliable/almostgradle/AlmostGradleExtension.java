@@ -138,6 +138,10 @@ public abstract class AlmostGradleExtension {
         });
 
         if (getDataGen().get()) {
+            mainSourceSet.resources(sourceSet -> {
+                sourceSet.srcDir("src/generated/resources");
+                sourceSet.exclude("**/.cache/**");
+            });
             neoForge.getRuns().create("datagen", (run) -> {
                 run.data();
                 run.getMods().set(Set.of(mainMod));
