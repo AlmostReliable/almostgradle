@@ -174,6 +174,8 @@ public abstract class AlmostGradleExtension {
                     "--existing", project.file("src/main/resources").getAbsolutePath()
             );
         });
+
+        log("📕Applied datagen output under: " + generatedPath.replace('/', '.'));
     }
 
     private void applyBasics() {
