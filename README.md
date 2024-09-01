@@ -73,7 +73,7 @@ After specifying the required entries and calling the `setup` method, Almost Gra
 
 The behavior of this process and additional features can be modified by the following configuration options.
 
-### Sources Jar
+## Sources Jar
 
 This feature enables the generation of a source JAR for the mod. The artifact is generated when the `build` task is
 invoked.
