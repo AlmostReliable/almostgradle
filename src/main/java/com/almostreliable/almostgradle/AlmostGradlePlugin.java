@@ -6,8 +6,10 @@ import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin;
 import org.gradle.api.tasks.compile.JavaCompile;
 
+@SuppressWarnings("unused")
 public class AlmostGradlePlugin implements Plugin<Project> {
 
+    @Override
     public void apply(Project project) {
         project.getPlugins().apply(JavaPlugin.class);
         project.getPlugins().apply(MavenPublishPlugin.class);
