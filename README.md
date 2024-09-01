@@ -1,137 +1,304 @@
-# AlmostGradle
+<h1 align="center">
+    <p>Almost Gradle</p>
+</h1>
 
-Utility plugin for setting up a NeoForge Mod when using [ModDevGradle](https://github.com/neoforged/ModDevGradle). The
-main usage is to reduce some boilerplate each project has to deal with, like `processResources` or creating the base mod
-run or a test mod.
+<div align="center">
 
-## Applying the plugin
+A utility [Gradle] plugin for setting up [NeoForge] mods with [ModDevGradle].
 
-Same as MDG, the plugin is hosted at the [gradle plugin portal](please add link to the plugin here).
-To create a minimalistic project, all we have to do is to apply the ModDevGradle and AlmostGradle plugin.
+[![Workflow Status][workflow_status_badge]][workflow_status_link]
+![License][license_badge]
+[![Version][version_badge]][version_link]
+[![Discord][discord_badge]][discord]
 
-#### `build.gradle`
+</div>
 
-```kts
-plugins {
-    id("net.neoforged.moddev") version "1.0.9"
-    id("com.almostreliable.almostgradle") version "1.0"
-}
-```
+# Applying the Plugin
 
-## Configurations
+Almost Gradle is hosted at the Gradle plugin portal. Since [ModDevGradle] is hosted there as well, no additional
+repositories are necessary.
 
-The java plugin in gradles comes with some pre-defined configurations. `Transitive` means that if for an example *
-*Project A** relies on _Project B_, then **Project A** will also load the dependencies into the respective classpath.
-
-### Standard configurations
-
-| Configuration    | Compile | Runtime | Transitive |
-|------------------|:-------:|:-------:|:----------:|
-| `implementation` |   ✔️    |   ✔️    |  Runtime   |
-| `api`            |   ✔️    |   ✔️    |    Both    |
-| `compileOnly`    |   ✔️    |    ❌    |    None    |
-| `compileOnlyApi` |   ✔️    |    ❌    |  Compile   |
-| `runtimeOnly`    |    ❌    |   ✔️    |  Runtime   |
-
-### Additional configurations
-
-Sometimes you want to load a mod only into the runtime classpath but without being transitive. For this case, similiar
-to `loom`, `AlmostGradle` adds the `localRuntime` configuration.
-
-| Configuration  | Compile | Runtime | Transitive |
-|----------------|:-------:|:-------:|:----------:|
-| `localRuntime` |    ❌    |   ✔️    |    None    |
-
-```kts
-dependency {
-    localRuntime("com.example:example-mod:1.0")
-}
-```
-
-### Test configurations
-
-To load dependencies into the test classpath, we can simply prefix the configuration
-with `test`. `implementation` -> `testImplementation` etc.
-
-```kts
-dependency {
-    testCocalRuntime("com.example:example-mod:1.0")
-}
-```
-
-## Automatic project setup
-
-`AlmostGradle` offers an automatic setup for most of the common use cases.
+To create a minimal project, only [ModDevGradle] and Almost Gradle have to be applied. Note that Almost Gradle does not
+automatically apply the [ModDevGradle] plugin, allowing to choose its version manually.
 
 ```kts
 plugins {
-    id("net.neoforged.moddev") version "1.0.9"
-    id("com.almostreliable.almostgradle") version "1.0"
+    id("net.neoforged.moddev") version "2.0.+"
+    id("com.almostreliable.almostgradle") version "1.0.+"
+}
+```
+
+# Automated Setup
+
+Almost Gradle offers an automated setup for common use cases. The following example shows the minimal setup.
+
+```kts
+plugins {
+    id("net.neoforged.moddev") version "2.0.+"
+    id("com.almostreliable.almostgradle") version "1.0.+"
 }
 
+almostgradle.setup {}
+```
+
+This step requires some entries inside the `gradle.properties` file. If they are missing, the plugin will throw an error
+and stop the setup.
+
+```properties
+group = com.example
+modId = mod_id
+modName = ModName
+modVersion = 1.0.0
+minecraftVersion = 1.21.1
+neoforgeVersion = 21.1.34
+```
+
+After specifying the required entries and calling the `setup` method, Almost Gradle will do the following things:
+
+- basics
+    - set the project group
+    - set the project version as `minecraftVersion-modVersion`
+    - set the base archive name to `modId-neoforge`
+    - [enable generation of a source JAR](#sources-jar)
+- [process resources](#process-resources)
+    - collect all placeholder properties from resource files
+    - validate if all placeholders have a respective property in the `gradle.properties` file
+    - create a `processResources` task that replaces the placeholders with the respective values on build
+- [build config](#build-config)
+    - generate a class with mod constants
+- apply mod basics
+    - set the NeoForge version
+    - create the main mod from the main source set
+    - ensure that the default run configurations `client` and `server` only load the main mod
+
+The behavior of this process and additional features can be modified by the following configuration options.
+
+### Sources Jar
+
+This feature enables the generation of a source JAR for the mod. The artifact is generated when the `build` task is
+invoked.
+
+### Defaults:
+
+Enabled: `true`
+
+### Configuration:
+
+This feature can be disabled in the `setup` block.
+
+```kts
 almostgradle.setup {
-    // configure stuff e.g.
-    // testMod = true
+    withSourcesJar = false
 }
 ```
 
-Using the automatic setup, requires to define some properties inside the `gradle.properties`.
+## Process Resources
 
-```properties
-group=com.example
-# Mod options
-modId=your-mod-id
-modName=YourModName
-modVersion=1.0
-# Common
-minecraftVersion=1.21
-neoforgeVersion=21.0.146
+This feature creates a `processResources` task to replace placeholders in resource files. Placeholders are defined as
+`${key}` and the task will replace them with the respective values inside the `gradle.properties` file. It throws an
+exception if a key is missing.
+
+### Defaults:
+
+Enabled: `true`
+
+### Configuration:
+
+This feature can be disabled in the `setup` block.
+
+```kts
+almostgradle.setup {
+    processResources = false
+}
 ```
 
-### BuildConfig
+## Build Config
 
-`AlmostGradle` uses the [BuildConfig](https://github.com/gmazzo/gradle-buildconfig-plugin) plugin to create a class with
-some mod info.
+This feature generates a class with mod constants. To achieve this, Almost Gradle internally uses the [Build Config]
+plugin. When the `build` task is invoked, the [Build Config] class will be generated.
 
-Default to `true`. On `build` the class will be generated under `group.modId.BuildConfig`. But you can define a
-different package and class name inside the `gradle.properties`.
+### Defaults:
 
-```properties
-almostgradle.buildconfig.package=some.example.package.path
-almostgradle.buildconfig.name=MyModInformation
+Enabled: `true`<br>
+Package: `group.modId`<br>
+Name: `BuildConfig`
+
+### Configuration:
+
+This feature can be disabled in the `setup` block.
+
+```kts
+almostgradle.setup {
+    buildConfig = false
+}
 ```
 
-### Basic options
+When enabled, it's possible to define a custom package and class name inside the `gradle.properties` file.
 
-#### DataGen
+```properties
+almostgradle.buildconfig.package = some.example.package.path
+almostgradle.buildconfig.name = ModConstants
+```
 
-Default to `false`. When activating, a run config for data generation will be created. The output path for the data will
-be in `src/generated/resources`.
+## Launch Arguments
 
-#### Process Resources
+This feature allows setting specific launch arguments for the game.
 
-Default to `true`. Automatically creates a `processResources` task to replace placeholders inside `neoforge.mods.toml`
-and `pack.mcmeta`. Placeholders are defined as `${key}` and the task will replace them with the respective values inside
-the `gradle.properties`. So `${modId}` will be replaced with the value of `modId` inside our `gradle.properties`.
+### Resize Client
 
-If a key is missing, it will throw an exception.
+This launch argument will resize all client run configurations to `1920x1080`.
 
-#### Sources Jar
+#### Defaults:
 
-Default to `true`. Will create a sources jar for the mod on build.
+Enabled: `false`
 
-#### Test Mod
+#### Configuration:
 
-Default to `false`. When activating, a test mod will be created inside MDG with its own run config. For the test mod the
-default `test` source set will be used.
+This feature can be enabled in the `setup` block.
 
-It's still required to create an entry mod class and the `neoforge.mods.toml` file. A simple `neoforge.mods.toml` for
-testing could look like this:
+```kts
+almostgradle.setup {
+    launchArgs {
+        resizeClient = true
+    }
+}
+```
+
+Alternatively, it can be enabled via property in the `gradle.properties` file.
+
+````properties
+almostgradle.launchArgs.resizeClient = true
+````
+
+### Auto World Join
+
+This launch argument will enable auto world joining when the client is started.
+
+#### Defaults:
+
+Enabled: `false`<br>
+World Name: `New World`
+
+#### Configuration:
+
+This feature can be enabled in the `setup` block.
+
+```kts
+almostgradle.setup {
+    launchArgs {
+        autoWorldJoin = true
+    }
+}
+```
+
+When a custom world name is required, it's also possible to specify the property as a string. It will be used as the
+world name and enable the feature automatically.
+
+```kts
+almostgradle.setup {
+    launchArgs {
+        autoWorldJoin = "My World"
+    }
+}
+```
+
+Alternatively, it can be enabled via property in the `gradle.properties` file.
+
+````properties
+almostgradle.launchArgs.autoWorldJoin = true
+almostgradle.launchArgs.autoWorldJoin = My World
+````
+
+### Log Level
+
+This launch argument will set the log level for all run configurations.
+
+#### Defaults:
+
+Level: `DEBUG`
+
+#### Configuration:
+
+This feature can be modified in the `setup` block.
+
+```kts
+almostgradle.setup {
+    launchArgs {
+        loggingLevel = "INFO"
+    }
+}
+```
+
+Alternatively, it can be modified via property in the `gradle.properties` file.
+
+````properties
+almostgradle.launchArgs.loggingLevel = INFO
+````
+
+### Mixin Debug Output
+
+This launch argument will enable mixin debug output for all run configurations.
+
+#### Defaults:
+
+Enabled: `false`
+
+#### Configuration:
+
+This feature can be enabled in the `setup` block.
+
+```kts
+almostgradle.setup {
+    launchArgs {
+        mixinDebugOutput = true
+    }
+}
+```
+
+Alternatively, it can be enabled via property in the `gradle.properties` file.
+
+````properties
+almostgradle.launchArgs.mixinDebugOutput = true
+````
+
+## Data Generation
+
+This feature generates a run configuration for data generation.
+
+### Defaults:
+
+Enabled: `false`<br>
+Path: `src/generated/resources`
+
+### Configuration:
+
+This feature can be enabled in the `setup` block.
+
+```kts
+almostgradle.setup {
+    dataGen = true
+}
+```
+
+When a custom path is required, it's also possible to specify the property as a string. It will be used as the path and
+enable the feature automatically.
+
+```kts
+almostgradle.setup {
+    dataGen = "src/main/resources/generated"
+}
+```
+
+## Test Mod
+
+This feature creates a test mod with its own run configuration. It will use the default `test` source set. An additional
+run configuration is created for running game tests.
+
+The test mod requires a main mod class and its own `neoforge.mods.toml` file. It should look like this:
 
 ```toml
 modLoader = "javafml"
 loaderVersion = "[2,)"
-license = "ARR"
 
 [[mods]]
 modId = "testmod"
@@ -139,170 +306,147 @@ version = "0.0.0"
 displayName = "Test Mod"
 ```
 
-### Recipe Viewers
+### Defaults:
 
-Setup multiple recipe viewers and how they should be loaded. You can load each recipe viewer in its own `run config`, so
-no static toggle with gradle reloads are required.
+Enabled: `false`
 
-* The `mode` defines if the `api`, `full` mod or `none` should be loaded into the `compile` classpath. Default
-  to `none`.
-* The `runConfig` defines if a specific run config should be created for the recipe viewer. Default to `false`.
+### Configuration:
 
-If no `version` is defined for specific recipe viewers, their will not be handled at all, so you can choose on your own
-which viewer should be used and how.
-
-#### Configure via `setup`
+This feature can be enabled in the `setup` block.
 
 ```kts
 almostgradle.setup {
     testMod = true
-    resizeClient = true
+}
+```
+
+## Recipe Viewers
+
+This feature allows configuration of recipe viewers and how they should be loaded. Recipe viewers can be loaded in their
+own run configurations to avoid static toggles. If no version is defined for a recipe viewer, it will not be handled.
+
+Currently supported recipe viewers are JEI, REI, and EMI.
+
+*Mode* refers to the behavior of the recipe viewer.<br>
+Possible values are:
+
+- `api` - only load the API artifact into the compile time classpath
+- `full` - load the full mod into the compile time classpath
+- `none` - don't load anything into the compile time classpath
+
+*Run Config* refers to whether a run configuration should be created for the recipe viewer.
+
+### Defaults:
+
+Mode: `none`<br>
+Run Config: `false`
+
+### Configuration:
+
+This feature can be enabled and modified in the `setup` block.
+
+```kts
+almostgradle.setup {
     recipeViewers {
         emi {
             runConfig = true
             mode = LoadingMode.API
             version = "x.x.x"
         }
-
         rei {
             runConfig = true
-            mode = LoadingMode.API
+            mode = LoadingMode.FULL
             version = "x.x.x"
         }
-
         jei {
             runConfig = false
             mode = LoadingMode.API
             version = "x.x.x"
             /**
-             * Target a custom minecraft version just for this recipe viewer. Useful when the recipe viewer is
-             * not updated yet, but we rely on their API for compilation.
+             * Targets a custom Minecraft version. Useful when the recipe viewer is
+             * not updated yet, but code relies on its API for compilation.
              */
             minecraftVersion = "1.20"
-
         }
     }
 }
 ```
 
-#### Configure via `gradle.properties`
+Alternatively, it can be enabled and modified via properties in the `gradle.properties` file.
 
 ```properties
 almostgradle.recipeViewers.emi.runConfig=true
 almostgradle.recipeViewers.emi.mode=API
 almostgradle.recipeViewers.emi.version=x.x.x
-```
 
-```properties
 almostgradle.recipeViewers.rei.runConfig=true
-almostgradle.recipeViewers.rei.mode=API
+almostgradle.recipeViewers.rei.mode=FULL
 almostgradle.recipeViewers.rei.version=x.x.x
-```
 
-```properties
 almostgradle.recipeViewers.jei.runConfig=true
 almostgradle.recipeViewers.jei.mode=API
 almostgradle.recipeViewers.jei.version=x.x.x
+almostgradle.recipeViewers.jei.minecraftVersion=1.20
 ```
 
-#### Custom usage
-
-It's also possible to only set the `version` for a recipe viewer and create the dependency on demand. This is useful if
-you have special cases, or you want to load the recipe viewer in a specific configuration.
+Additionally, it's possible to set the version for a recipe viewer and create the dependency on demand. This is useful
+if you have special cases, or if you want to load the recipe viewer in a specific configuration.
 
 ```kts
 dependency {
-    // Load the basic dependency into `localRuntime`
+    // Loads the basic dependency into `localRuntime`.
     localRuntime(almostgradle.recipeViewers.emi.dependency)
 
-    // Or load the API into `compileOnly`
+    // Loads the API into `compileOnly`.
     compileOnly(almostgradle.recipeViewers.emi.apiDependency)
 }
 ```
 
-### Launch Args
+# Configurations
 
-#### Resize Client
+Next to the default ones, the plugin offers additional configurations to load dependencies into the classpath.
 
-Default to `false`. When activating, all client run configs will be resized to `1920x1080`, when starting the game.
+*Transitive* refers to the behavior of the dependencies.<br>
+For example, if *Project B* has some transitive dependency and *Project A* depends on *Project B*, *Project A* will also
+load the dependency.
 
-#### `build.gradle`
+## Default Configurations
 
-```kts
-almostgradle.setup {
-    // other stuff
-    launchArgs {
-        resizeClient = true
-    }
-}
-```
+The [Java plugin] ships some default configurations.
 
-#### `gradle.properties`
+| Configuration    | Compile | Runtime | Transitive |
+|------------------|:-------:|:-------:|:----------:|
+| `runtimeOnly`    |    ❌    |   ✔️    |  Runtime   |
+| `compileOnly`    |   ✔️    |    ❌    |    None    |
+| `compileOnlyApi` |   ✔️    |    ❌    |  Compile   |
+| `implementation` |   ✔️    |   ✔️    |  Runtime   |
+| `api`            |   ✔️    |   ✔️    |    Both    |
 
-````properties
-almostgradle.launchArgs.resizeClient=true
-````
+## Additional Configurations
 
-#### Auto World Join
+Almost Gradle offers additional configurations.
 
-Default to `false`. When activating, the game will automatically join the world when starting the game. The value can be
-either `true`, `false` or a world name.
+| Configuration  | Compile | Runtime | Transitive |
+|----------------|:-------:|:-------:|:----------:|
+| `localRuntime` |    ❌    |   ✔️    |    None    |
 
-#### `build.gradle`
+## Test Configurations
 
-```kts
-almostgradle.setup {
-    // other stuff
-    launchArgs {
-        autoWorldJoin = true
-    }
-}
-```
+Almost Gradle also allows applying dependencies to the test classpath only. To do that, the configuration has to be
+prefixed with `test`.
 
-#### `gradle.properties`
+<!-- Badges -->
+[workflow_status_badge]: https://img.shields.io/github/actions/workflow/status/AlmostReliable/almostgradle/build.yml?branch=main&style=for-the-badge
+[workflow_status_link]: https://github.com/AlmostReliable/almostgradle/actions
+[license_badge]: https://img.shields.io/badge/License-ARR-ffa200?style=for-the-badge
+[version_badge]: https://img.shields.io/github/v/release/AlmostReliable/almostgradle?include_prereleases&style=for-the-badge
+[version_link]: https://github.com/AlmostReliable/almostgradle/releases/latest
+[discord_badge]: https://img.shields.io/discord/917251858974789693?color=5865f2&label=Discord&logo=discord&style=for-the-badge
 
-````properties
-almostgradle.launchArgs.autoWorldJoin=true
-````
-
-### Logging Level
-
-Default to `DEBUG`. Will set the logging level for the mod.
-
-#### `build.gradle`
-
-```kts
-almostgradle.setup {
-    // other stuff
-    launchArgs {
-        loggingLevel = "INFO"
-    }
-}
-```
-
-#### `gradle.properties`
-
-````properties
-almostgradle.launchArgs.loggingLevel=INFO
-````
-
-### Mixin Debug Output
-
-Default to `false`. Will set the Mixin debug for the mod.
-
-#### `build.gradle`
-
-```kts
-almostgradle.setup {
-    // other stuff
-    launchArgs {
-        mixinDebugOutput = true
-    }
-}
-```
-
-#### `gradle.properties`
-
-````properties
-almostgradle.launchArgs.mixinDebugOutput=true
-````
+<!-- Links -->
+[gradle]: https://gradle.org/
+[neoforge]: https://neoforged.net/
+[moddevgradle]: https://github.com/neoforged/ModDevGradle
+[discord]: https://discord.com/invite/ThFnwZCyYY
+[java plugin]: https://docs.gradle.org/current/userguide/java_plugin.html
+[build config]: https://github.com/gmazzo/gradle-buildconfig-plugin
