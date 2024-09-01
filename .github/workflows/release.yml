@@ -47,7 +47,7 @@ jobs:
           UPDATE_TYPE: ${{ inputs.update_type }}
         run: |
           echo "getting current version"
-          CURRENT_VERSION=$(grep -oP '^version\s*=\s*\K"[^"]*' build.gradle.kts)
+          CURRENT_VERSION=$(grep -oP '^version\s*=\s*"\K[^"]*' build.gradle.kts)
           echo "detected current version: $CURRENT_VERSION"
 
           if [[ -z "$CURRENT_VERSION" ]]; then
