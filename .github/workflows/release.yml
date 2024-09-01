@@ -88,7 +88,7 @@ jobs:
         env:
           VERSION: ${{ steps.version.outputs.VERSION }}
         run: |
-          if grep -q '^version\s*=\s*"$VERSION"' build.gradle.kts; then
+          if grep -q "^version\s*=\s*\"$VERSION\"" build.gradle.kts; then
             echo "version is already set"
           else
             echo "version is outdated, adjusting build.gradle.kts"
