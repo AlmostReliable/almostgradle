@@ -340,6 +340,8 @@ Possible values are:
 
 Mode: `none`<br>
 Run Config: `false`
+Minecraft Version: same as project
+Maven Repository: default for the respective recipe viewer
 
 ### Configuration:
 
@@ -352,6 +354,10 @@ almostgradle.setup {
             runConfig = true
             mode = LoadingMode.API
             version = "x.x.x"
+            /**
+             * Tries to fetch the artifact from a specific Maven repository.
+             */
+            mavenRepository = "https://modmaven.dev"
         }
         rei {
             runConfig = true
@@ -375,18 +381,19 @@ almostgradle.setup {
 Alternatively, it can be enabled and modified via properties in the `gradle.properties` file.
 
 ```properties
-almostgradle.recipeViewers.emi.runConfig=true
-almostgradle.recipeViewers.emi.mode=API
-almostgradle.recipeViewers.emi.version=x.x.x
+almostgradle.recipeViewers.emi.runConfig = true
+almostgradle.recipeViewers.emi.mode = API
+almostgradle.recipeViewers.emi.version = x.x.x
+almostgradle.recipeViewers.emi.maven = https://modmaven.dev
 
-almostgradle.recipeViewers.rei.runConfig=true
-almostgradle.recipeViewers.rei.mode=FULL
-almostgradle.recipeViewers.rei.version=x.x.x
+almostgradle.recipeViewers.rei.runConfig = true
+almostgradle.recipeViewers.rei.mode = FULL
+almostgradle.recipeViewers.rei.version = x.x.x
 
-almostgradle.recipeViewers.jei.runConfig=true
-almostgradle.recipeViewers.jei.mode=API
-almostgradle.recipeViewers.jei.version=x.x.x
-almostgradle.recipeViewers.jei.minecraftVersion=1.20
+almostgradle.recipeViewers.jei.runConfig = true
+almostgradle.recipeViewers.jei.mode = API
+almostgradle.recipeViewers.jei.version = x.x.x
+almostgradle.recipeViewers.jei.minecraftVersion = 1.20
 ```
 
 Additionally, it's possible to set the version for a recipe viewer and create the dependency on demand. This is useful
