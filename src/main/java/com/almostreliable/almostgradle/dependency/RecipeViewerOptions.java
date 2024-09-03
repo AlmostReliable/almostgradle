@@ -49,15 +49,13 @@ public abstract class RecipeViewerOptions {
 
     public Provider<ModuleDependency> getDependency() {
         var almostGradle = project.getExtensions().getByType(AlmostGradleExtension.class);
-        return getVersion().map(v -> mod.createDependency(almostGradle.getMinecraftVersion(),
-                v,
-                project.getDependencyFactory()));
+        var mcv = getMinecraftVersion().orElse(almostGradle.getMinecraftVersion()).get();
+        return getVersion().map(v -> mod.createDependency(mcv, v, project.getDependencyFactory()));
     }
 
     public Provider<ModuleDependency> getApiDependency() {
         var almostGradle = project.getExtensions().getByType(AlmostGradleExtension.class);
-        return getVersion().map(v -> mod.createApiDependency(almostGradle.getMinecraftVersion(),
-                v,
-                project.getDependencyFactory()));
+        var mcv = getMinecraftVersion().orElse(almostGradle.getMinecraftVersion()).get();
+        return getVersion().map(v -> mod.createApiDependency(mcv, v, project.getDependencyFactory()));
     }
 }
