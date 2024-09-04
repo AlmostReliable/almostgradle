@@ -92,7 +92,7 @@ jobs:
             echo "version is already set"
           else
             echo "version is outdated, adjusting build.gradle.kts"
-            sed -i "s/^version\s*=.*$/version = $VERSION/g" build.gradle.kts
+            sed -i "s/^version\s*=.*$/version = \"$VERSION\"/g" build.gradle.kts
             git diff build.gradle.kts
           fi
 
