@@ -296,6 +296,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Download preparation artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: preparation-artifacts
+
+      - name: Extract preparation artifacts
+        run: tar -zxvf preparation.tar.gz
+
       - name: Checkout compound action
         uses: actions/checkout@v4
         with:
