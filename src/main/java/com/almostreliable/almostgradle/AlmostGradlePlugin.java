@@ -17,6 +17,15 @@ public class AlmostGradlePlugin implements Plugin<Project> {
         Utils.createLocalRuntime(project, JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME, null);
         Utils.createLocalRuntime(project, JavaPlugin.TEST_RUNTIME_CLASSPATH_CONFIGURATION_NAME, "test");
 
+        Utils.createLocalImplementation(project,
+                JavaPlugin.COMPILE_CLASSPATH_CONFIGURATION_NAME,
+                JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME,
+                null);
+        Utils.createLocalImplementation(project,
+                JavaPlugin.TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME,
+                JavaPlugin.TEST_RUNTIME_CLASSPATH_CONFIGURATION_NAME,
+                "test");
+
         project.getTasks().withType(JavaCompile.class).whenTaskAdded(javaCompile -> {
             javaCompile.getOptions().setEncoding("UTF-8");
         });

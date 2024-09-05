@@ -36,6 +36,17 @@ public class Utils {
         });
     }
 
+    public static void createLocalImplementation(Project project, String compileClassPathConfigName, String runtimeClassPathConfigName, @Nullable String prefix) {
+        String name = prefix == null ? "localImplementation" : prefix + "LocalImplementation";
+        project.getConfigurations().create(name, c -> {
+            c.setVisible(true);
+            c.setCanBeResolved(true);
+            c.setCanBeConsumed(false);
+            project.getConfigurations().getByName(compileClassPathConfigName).extendsFrom(c);
+            project.getConfigurations().getByName(runtimeClassPathConfigName).extendsFrom(c);
+        });
+    }
+
     public static void log(Project project, String key, Object value) {
         project.getLogger().lifecycle(String.format("%-25s -> %s", key, value));
     }

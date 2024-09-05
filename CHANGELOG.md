@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog], and this project adheres to [Semantic Versioning].
 
 ## Unreleased
-- /
+- added `localImplementation` and `testLocalImplementation` to load dependencies into compile & runtime classpath without being transitive for consumers
 
 ## [1.0.1] - 2024-09-04
 

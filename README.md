@@ -433,9 +433,10 @@ The [Java plugin] ships some default configurations.
 
 Almost Gradle offers additional configurations.
 
-| Configuration  | Compile | Runtime | Transitive |
-|----------------|:-------:|:-------:|:----------:|
-| `localRuntime` |    ❌    |   ✔️    |    None    |
+| Configuration         | Compile | Runtime | Transitive |
+|-----------------------|:-------:|:-------:|:----------:|
+| `localRuntime`        |    ❌    |   ✔️    |    None    |
+| `localImplementation` |  ️️ ✔️  |   ✔️    |    None    |
 
 ## Test Configurations
 
