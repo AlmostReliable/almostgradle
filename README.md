@@ -15,7 +15,7 @@ A utility [Gradle] plugin for setting up [NeoForge] mods with [ModDevGradle].
 
 # Applying the Plugin
 
-Almost Gradle is hosted at the Gradle plugin portal. Since [ModDevGradle] is hosted there as well, no additional
+Almost Gradle is hosted at the [Gradle plugin portal]. Since [ModDevGradle] is hosted there as well, no additional
 repositories are necessary.
 
 To create a minimal project, only [ModDevGradle] and Almost Gradle have to be applied. Note that Almost Gradle does not
@@ -456,5 +456,6 @@ prefixed with `test`.
 [neoforge]: https://neoforged.net/
 [moddevgradle]: https://github.com/neoforged/ModDevGradle
 [discord]: https://discord.com/invite/ThFnwZCyYY
+[gradle plugin portal]: https://plugins.gradle.org/plugin/com.almostreliable.almostgradle
 [java plugin]: https://docs.gradle.org/current/userguide/java_plugin.html
 [build config]: https://github.com/gmazzo/gradle-buildconfig-plugin
