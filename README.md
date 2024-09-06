@@ -339,8 +339,8 @@ Possible values are:
 ### Defaults:
 
 Mode: `none`<br>
-Run Config: `false`
-Minecraft Version: same as project
+Run Config: `false`<br>
+Minecraft Version: same as project<br>
 Maven Repository: default for the respective recipe viewer
 
 ### Configuration:
