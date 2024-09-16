@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 - /
 
 ## [1.1.1] - 2024-09-16
-- fix compile error with newest MDG. See [MDG#158](https://github.com/neoforged/ModDevGradle/pull/158)
+- fixed compile error with newest ModDevGradle ([MDG#158](https://github.com/neoforged/ModDevGradle/pull/158))
 
 ## [1.1.0] - 2024-09-05
 - added `localImplementation` and `testLocalImplementation` to load dependencies into compile & runtime classpath without being transitive for consumers
