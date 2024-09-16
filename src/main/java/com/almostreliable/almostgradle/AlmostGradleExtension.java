@@ -137,11 +137,11 @@ public abstract class AlmostGradleExtension {
         mainMod.sourceSet(mainSourceSet);
         neoForge.getRuns().create("client", (run) -> {
             run.client();
-            run.getMods().set(Set.of(mainMod));
+            run.getLoadedMods().set(Set.of(mainMod));
         });
         neoForge.getRuns().create("server", (run) -> {
             run.server();
-            run.getMods().set(Set.of(mainMod));
+            run.getLoadedMods().set(Set.of(mainMod));
         });
 
         applyDataGen(neoForge, mainMod, mainSourceSet);
@@ -166,7 +166,7 @@ public abstract class AlmostGradleExtension {
         });
         neoForge.getRuns().create("datagen", (run) -> {
             run.data();
-            run.getMods().set(Set.of(mainMod));
+            run.getLoadedMods().set(Set.of(mainMod));
             run.getProgramArguments().addAll(
                     "--mod", getModId(),
                     "--all",
