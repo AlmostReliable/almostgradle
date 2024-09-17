@@ -10,7 +10,10 @@ import org.gradle.api.Project;
 import org.gradle.api.plugins.BasePluginExtension;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.provider.Property;
+import org.gradle.api.publish.PublishingExtension;
+import org.gradle.api.publish.maven.MavenPublication;
 import org.gradle.api.tasks.SourceSet;
+import org.gradle.jvm.tasks.Jar;
 import org.gradle.language.jvm.tasks.ProcessResources;
 
 import javax.inject.Inject;
@@ -19,6 +22,7 @@ import java.util.Set;
 
 public abstract class AlmostGradleExtension {
     public static final String NAME = "almostgradle";
+    public static final String MAVEN = "mavenJava";
 
     private final Project project;
     private final RecipeViewers recipeViewers;
@@ -32,6 +36,8 @@ public abstract class AlmostGradleExtension {
         var providers = project.getProviders();
 
         getTestMod().convention(false);
+        getApiSourceSet().convention(false);
+        getMavenPublish().convention(false);
         getDataGen().set(providers.gradleProperty("datagen").map(s -> {
             if (s.equals("true")) return true;
             if (s.equals("false")) return false;
@@ -52,6 +58,10 @@ public abstract class AlmostGradleExtension {
     public abstract Property<Boolean> getBuildConfig();
 
     public abstract Property<Object> getDataGen();
+
+    public abstract Property<Boolean> getApiSourceSet();
+
+    public abstract Property<Boolean> getMavenPublish();
 
     public RecipeViewers getRecipeViewers() {
         return recipeViewers;
@@ -103,6 +113,7 @@ public abstract class AlmostGradleExtension {
 
         createProcessResourcesTask();
         applyBuildConfig();
+        applyApiSourceSet();
         applyBasicMod();
         applyTestMod();
         getRecipeViewers().createRuns();
@@ -127,6 +138,51 @@ public abstract class AlmostGradleExtension {
         });
     }
 
+    private void applyApiSourceSet() {
+        if (!getApiSourceSet().get()) {
+            return;
+        }
+
+        var javaPlugin = project.getExtensions().getByType(JavaPluginExtension.class);
+        var main = javaPlugin.getSourceSets().getByName("main");
+        var api = javaPlugin.getSourceSets().create("api");
+        var neoForge = project.getExtensions().getByType(NeoForgeExtension.class);
+        neoForge.addModdingDependenciesTo(api);
+        project.getDependencies().add(main.getImplementationConfigurationName(), api.getOutput());
+
+        var apiJar = project.getTasks().register("apiJar", Jar.class, jar -> {
+            jar.getArchiveClassifier().set("api");
+            jar.from(api.getOutput());
+        });
+
+        var apiSources = project.getTasks().register("apiSources", Jar.class, jar -> {
+            jar.getArchiveClassifier().set("api-sources");
+            jar.from(api.getAllJava());
+        });
+
+        project.getTasks().named("jar", Jar.class, jar -> {
+            jar.dependsOn(apiJar);
+            jar.from(api.getOutput());
+        });
+
+        project.artifacts(a -> {
+            a.add("archives", apiJar);
+            a.add("archives", apiSources);
+        });
+
+        var maven = project.getExtensions().getByType(PublishingExtension.class);
+        maven.getPublications().withType(MavenPublication.class).configureEach(pub -> {
+            pub.artifact(apiJar);
+            pub.artifact(apiSources);
+        });
+
+        if (getWithSourcesJar().get()) {
+            project.getTasks().named("sourcesJar", Jar.class, jar -> {
+                jar.from(api.getAllJava());
+            });
+        }
+    }
+
     private void applyBasicMod() {
         var neoForge = project.getExtensions().getByType(NeoForgeExtension.class);
         var javaPlugin = project.getExtensions().getByType(JavaPluginExtension.class);
@@ -135,6 +191,10 @@ public abstract class AlmostGradleExtension {
         var mainSourceSet = javaPlugin.getSourceSets().getByName("main");
 
         mainMod.sourceSet(mainSourceSet);
+        if (getApiSourceSet().get()) {
+            mainMod.sourceSet(javaPlugin.getSourceSets().getByName("api"));
+        }
+
         neoForge.getRuns().create("client", (run) -> {
             run.client();
             run.getLoadedMods().set(Set.of(mainMod));
@@ -167,12 +227,15 @@ public abstract class AlmostGradleExtension {
         neoForge.getRuns().create("datagen", (run) -> {
             run.data();
             run.getLoadedMods().set(Set.of(mainMod));
-            run.getProgramArguments().addAll(
-                    "--mod", getModId(),
-                    "--all",
-                    "--output", project.file(generatedPath).getAbsolutePath(),
-                    "--existing", project.file("src/main/resources").getAbsolutePath()
-            );
+            run
+                    .getProgramArguments()
+                    .addAll("--mod",
+                            getModId(),
+                            "--all",
+                            "--output",
+                            project.file(generatedPath).getAbsolutePath(),
+                            "--existing",
+                            project.file("src/main/resources").getAbsolutePath());
         });
 
         log("📕Applied datagen output under: " + generatedPath.replace('/', '.'));
@@ -194,6 +257,13 @@ public abstract class AlmostGradleExtension {
         if (getWithSourcesJar().get()) {
             var javaPlugin = project.getExtensions().getByType(JavaPluginExtension.class);
             javaPlugin.withSourcesJar();
+        }
+
+        if (getMavenPublish().get()) {
+            project.getPlugins().apply("maven-publish");
+            var maven = project.getExtensions().getByType(PublishingExtension.class);
+            var pub = maven.getPublications().create(MAVEN, MavenPublication.class);
+            pub.from(project.getComponents().getByName("java"));
         }
     }
 
