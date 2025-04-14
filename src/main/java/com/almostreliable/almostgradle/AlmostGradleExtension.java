@@ -186,7 +186,7 @@ public abstract class AlmostGradleExtension {
     private void applyBasicMod() {
         var neoForge = project.getExtensions().getByType(NeoForgeExtension.class);
         var javaPlugin = project.getExtensions().getByType(JavaPluginExtension.class);
-        neoForge.getVersion().set(getNeoforgeVersion());
+        neoForge.setVersion(getNeoforgeVersion());
         var mainMod = neoForge.getMods().maybeCreate(getModId());
         var mainSourceSet = javaPlugin.getSourceSets().getByName("main");
 
