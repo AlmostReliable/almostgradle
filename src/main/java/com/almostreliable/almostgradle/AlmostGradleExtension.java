@@ -332,6 +332,9 @@ public abstract class AlmostGradleExtension {
             var exampleScripts = this.project.getRootDir().toPath().resolve("example_scripts").toString();
             runs.create("gametest", (run) -> {
                 run.server();
+                run
+                        .getGameDirectory()
+                        .set(project.getLayout().getProjectDirectory().dir("build").dir("tmp").dir("gametestRuns"));
                 run.getSourceSet().set(testSourceSet);
                 run.systemProperty("neoforge.gameTestServer", "true");
                 run.systemProperty("neoforge.enabledGameTestNamespaces", TESTMOD_ID);
