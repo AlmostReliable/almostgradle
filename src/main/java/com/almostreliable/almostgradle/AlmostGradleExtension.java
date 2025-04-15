@@ -100,6 +100,8 @@ public abstract class AlmostGradleExtension {
     }
 
     public void setup(Action<AlmostGradleExtension> onSetup) {
+        Utils.ensureMinimalPluginVersion(project, "net.neoforged.moddev", "2.0.64-beta");
+
         onSetup.execute(this);
         log("📕Setting up project through AlmostGradle plugin...");
 
