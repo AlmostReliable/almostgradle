@@ -3,14 +3,14 @@ package com.almostreliable.almostgradle;
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
-import org.gradle.api.artifacts.ResolvedDependency;
+import org.gradle.api.artifacts.Dependency;
+import org.gradle.api.artifacts.DependencySet;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 
 import javax.annotation.Nullable;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 public class Utils {
@@ -54,20 +54,19 @@ public class Utils {
     }
 
     public static void ensureMinimalPluginVersion(Project project, String pluginId, String minimumVersion) {
-        Set<ResolvedDependency> dependencies = project
+        DependencySet dependencies = project
                 .getBuildscript()
                 .getConfigurations()
                 .getByName("classpath")
-                .getResolvedConfiguration()
-                .getFirstLevelModuleDependencies();
+                .getDependencies();
 
-        for (ResolvedDependency dependency : dependencies) {
-            if (!dependency.getModuleGroup().equals(pluginId)) {
+        for (Dependency dependency : dependencies) {
+            if (!pluginId.equals(dependency.getGroup())) {
                 continue;
             }
 
-            String dependencyVersion = dependency.getModuleVersion();
-            if (!isVersionAtLeast(dependencyVersion, minimumVersion)) {
+            String dependencyVersion = dependency.getVersion();
+            if (dependencyVersion != null && !isVersionAtLeast(dependencyVersion, minimumVersion)) {
                 throw new GradleException("Plugin '" + pluginId + "' version " + dependencyVersion +
                                           " is less than the minimum required version " + minimumVersion + "!");
             }
