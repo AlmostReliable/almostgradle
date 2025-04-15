@@ -6,10 +6,12 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 
 ## Unreleased
 
+- added check for minimal Gradle version
 - added check for minimal ModDevGradle version
 - updated internal ModDevGradle version to 2.0.80
 - updated minimum ModDevGradle version to 2.0.64-beta
-- updated gradle wrapper to 8.12.1
+- updated Gradle wrapper to 8.12.1
+- updated minimum Gradle version to 8.12.1
 
 ## [1.1.1] - 2024-09-16
 

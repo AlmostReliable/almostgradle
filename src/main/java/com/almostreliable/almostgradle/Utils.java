@@ -53,6 +53,14 @@ public class Utils {
         });
     }
 
+    public static void ensureMinimalGradleVersion(Project project, String minimumVersion) {
+        String gradleVersion = project.getGradle().getGradleVersion();
+        if (!isVersionAtLeast(gradleVersion, minimumVersion)) {
+            throw new GradleException("Gradle version " + gradleVersion +
+                                      " is less than the minimum required version " + minimumVersion + "!");
+        }
+    }
+
     public static void ensureMinimalPluginVersion(Project project, String pluginId, String minimumVersion) {
         DependencySet dependencies = project
                 .getBuildscript()
