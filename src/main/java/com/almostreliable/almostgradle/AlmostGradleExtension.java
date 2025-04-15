@@ -229,6 +229,9 @@ public abstract class AlmostGradleExtension {
         });
         neoForge.getRuns().create("datagen", (run) -> {
             run.data();
+            run
+                    .getGameDirectory()
+                    .set(project.getLayout().getProjectDirectory().dir("build").dir("tmp").dir("datagenRuns"));
             run.getLoadedMods().set(Set.of(mainMod));
             run
                     .getProgramArguments()

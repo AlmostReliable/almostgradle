@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 - updated minimum ModDevGradle version to 2.0.64-beta
 - updated Gradle wrapper to 8.12.1
 - updated minimum Gradle version to 8.12.1
+- changed datagen run directory to temporary directory to avoid crashes with file-based runtime mods
 
 ## [1.1.1] - 2024-09-16
 
