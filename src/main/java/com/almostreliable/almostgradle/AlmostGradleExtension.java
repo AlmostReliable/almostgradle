@@ -23,6 +23,7 @@ import java.util.Set;
 public abstract class AlmostGradleExtension {
     public static final String NAME = "almostgradle";
     public static final String MAVEN = "mavenJava";
+    public static final String TESTMOD_ID = "testmod";
 
     private final Project project;
     private final RecipeViewers recipeViewers;
@@ -321,7 +322,7 @@ public abstract class AlmostGradleExtension {
         var testSourceSet = javaPlugin.getSourceSets().getByName("test");
         var modId = this.getModId();
         neoForge.mods((mods) -> {
-            mods.create("testmod", (mod) -> {
+            mods.create(TESTMOD_ID, (mod) -> {
                 mod.sourceSet(testSourceSet);
             });
         });
@@ -333,14 +334,14 @@ public abstract class AlmostGradleExtension {
                 run.server();
                 run.getSourceSet().set(testSourceSet);
                 run.systemProperty("neoforge.gameTestServer", "true");
-                run.systemProperty("neoforge.enabledGameTestNamespaces", modId);
+                run.systemProperty("neoforge.enabledGameTestNamespaces", TESTMOD_ID);
                 run.systemProperty(modId + ".example_scripts", exampleScripts);
             });
-            runs.create("testmod", (run) -> {
+            runs.create(TESTMOD_ID, (run) -> {
                 run.client();
                 run.getSourceSet().set(testSourceSet);
                 run.systemProperty("neoforge.gameTestServer", "true");
-                run.systemProperty("neoforge.enabledGameTestNamespaces", modId);
+                run.systemProperty("neoforge.enabledGameTestNamespaces", TESTMOD_ID);
                 run.systemProperty(modId + ".example_scripts", exampleScripts);
             });
         });
