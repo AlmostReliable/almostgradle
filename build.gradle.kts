@@ -1,7 +1,7 @@
 @file:Suppress("UnstableApiUsage")
 
 group = "com.almostreliable"
-version = "1.1.1"
+version = "1.2.0"
 
 plugins {
     id("com.gradle.plugin-publish") version "1.3.1"
