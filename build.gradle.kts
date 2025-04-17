@@ -4,7 +4,7 @@ group = "com.almostreliable"
 version = "1.1.1"
 
 plugins {
-    id("com.gradle.plugin-publish") version "1.2.2"
+    id("com.gradle.plugin-publish") version "1.3.1"
 }
 
 gradlePlugin {
@@ -38,12 +38,12 @@ repositories {
 
 buildscript {
     dependencies {
-        classpath("net.neoforged:moddev-gradle:2.0.+")
+        classpath("net.neoforged:moddev-gradle:2.0.80")
         classpath("com.github.gmazzo.buildconfig:plugin:5.4.0")
     }
 }
 
 dependencies {
-    compileOnly("net.neoforged:moddev-gradle:2.0.+")
+    compileOnly("net.neoforged:moddev-gradle:2.0.80")
     implementation("com.github.gmazzo.buildconfig:plugin:5.4.0")
 }

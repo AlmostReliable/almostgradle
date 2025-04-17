@@ -263,7 +263,9 @@ almostgradle.launchArgs.mixinDebugOutput = true
 
 ## Data Generation
 
-This feature generates a run configuration for data generation.
+This feature generates a run configuration for data generation. The game directory is set to a temporary folder inside
+the build directory to avoid crashes with file-based runtime mods. If you rely on runtime mods in the data generation,
+they have to be loaded via Gradle.
 
 ### Defaults:
 

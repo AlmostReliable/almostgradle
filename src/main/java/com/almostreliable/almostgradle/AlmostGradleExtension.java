@@ -23,6 +23,7 @@ import java.util.Set;
 public abstract class AlmostGradleExtension {
     public static final String NAME = "almostgradle";
     public static final String MAVEN = "mavenJava";
+    public static final String TESTMOD_ID = "testmod";
 
     private final Project project;
     private final RecipeViewers recipeViewers;
@@ -100,6 +101,9 @@ public abstract class AlmostGradleExtension {
     }
 
     public void setup(Action<AlmostGradleExtension> onSetup) {
+        Utils.ensureMinimalGradleVersion(project, "8.12.1");
+        Utils.ensureMinimalPluginVersion(project, "net.neoforged.moddev", "2.0.64-beta");
+
         onSetup.execute(this);
         log("📕Setting up project through AlmostGradle plugin...");
 
@@ -186,7 +190,7 @@ public abstract class AlmostGradleExtension {
     private void applyBasicMod() {
         var neoForge = project.getExtensions().getByType(NeoForgeExtension.class);
         var javaPlugin = project.getExtensions().getByType(JavaPluginExtension.class);
-        neoForge.getVersion().set(getNeoforgeVersion());
+        neoForge.setVersion(getNeoforgeVersion());
         var mainMod = neoForge.getMods().maybeCreate(getModId());
         var mainSourceSet = javaPlugin.getSourceSets().getByName("main");
 
@@ -226,6 +230,9 @@ public abstract class AlmostGradleExtension {
         });
         neoForge.getRuns().create("datagen", (run) -> {
             run.data();
+            run
+                    .getGameDirectory()
+                    .set(project.getLayout().getProjectDirectory().dir("build").dir("tmp").dir("datagenRuns"));
             run.getLoadedMods().set(Set.of(mainMod));
             run
                     .getProgramArguments()
@@ -315,7 +322,7 @@ public abstract class AlmostGradleExtension {
         var testSourceSet = javaPlugin.getSourceSets().getByName("test");
         var modId = this.getModId();
         neoForge.mods((mods) -> {
-            mods.create("testmod", (mod) -> {
+            mods.create(TESTMOD_ID, (mod) -> {
                 mod.sourceSet(testSourceSet);
             });
         });
@@ -325,16 +332,19 @@ public abstract class AlmostGradleExtension {
             var exampleScripts = this.project.getRootDir().toPath().resolve("example_scripts").toString();
             runs.create("gametest", (run) -> {
                 run.server();
+                run
+                        .getGameDirectory()
+                        .set(project.getLayout().getProjectDirectory().dir("build").dir("tmp").dir("gametestRuns"));
                 run.getSourceSet().set(testSourceSet);
                 run.systemProperty("neoforge.gameTestServer", "true");
-                run.systemProperty("neoforge.enabledGameTestNamespaces", modId);
+                run.systemProperty("neoforge.enabledGameTestNamespaces", TESTMOD_ID);
                 run.systemProperty(modId + ".example_scripts", exampleScripts);
             });
-            runs.create("testmod", (run) -> {
+            runs.create(TESTMOD_ID, (run) -> {
                 run.client();
                 run.getSourceSet().set(testSourceSet);
                 run.systemProperty("neoforge.gameTestServer", "true");
-                run.systemProperty("neoforge.enabledGameTestNamespaces", modId);
+                run.systemProperty("neoforge.enabledGameTestNamespaces", TESTMOD_ID);
                 run.systemProperty(modId + ".example_scripts", exampleScripts);
             });
         });
