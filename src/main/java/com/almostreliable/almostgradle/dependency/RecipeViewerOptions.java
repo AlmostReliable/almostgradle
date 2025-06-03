@@ -35,6 +35,10 @@ public abstract class RecipeViewerOptions {
                 .map(s -> s.equals("true"))
                 .orElse(false));
         getMinecraftVersion().convention(providers.gradleProperty(propPrefix + ".minecraftVersion"));
+        getTestMod().convention(providers
+                .gradleProperty(propPrefix + ".testMod")
+                .map(s -> s.equals("true"))
+                .orElse(true));
     }
 
     public abstract Property<String> getMavenRepository();
@@ -46,6 +50,8 @@ public abstract class RecipeViewerOptions {
     public abstract Property<Boolean> getRunConfig();
 
     public abstract Property<String> getMinecraftVersion();
+
+    public abstract Property<Boolean> getTestMod();
 
     public Provider<ModuleDependency> getDependency() {
         var almostGradle = project.getExtensions().getByType(AlmostGradleExtension.class);
