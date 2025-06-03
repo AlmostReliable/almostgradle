@@ -1,5 +1,6 @@
 package com.almostreliable.almostgradle.dependency;
 
+import com.almostreliable.almostgradle.AlmostGradleExtension;
 import com.almostreliable.almostgradle.Utils;
 import net.neoforged.moddevgradle.dsl.ModModel;
 import net.neoforged.moddevgradle.dsl.NeoForgeExtension;
@@ -59,13 +60,13 @@ public abstract class RecipeViewers {
     }
 
     @Internal
-    public void createRuns(String mainModId) {
-        createRun(mainModId, emi, ModDependency.EMI);
-        createRun(mainModId, jei, ModDependency.JEI);
-        createRun(mainModId, rei, ModDependency.REI);
+    public void createRuns() {
+        createRun(emi, ModDependency.EMI);
+        createRun(jei, ModDependency.JEI);
+        createRun(rei, ModDependency.REI);
     }
 
-    private void createRun(String mainModId, RecipeViewerOptions settings, ModDependency mod) {
+    private void createRun(RecipeViewerOptions settings, ModDependency mod) {
         if (!settings.getVersion().isPresent()) {
             return;
         }
@@ -90,10 +91,9 @@ public abstract class RecipeViewers {
 
         var neoForge = this.project.getExtensions().getByType(NeoForgeExtension.class);
         var java = this.project.getExtensions().getByType(JavaPluginExtension.class);
-        var mainMod = neoForge.getMods().maybeCreate(mainModId);
-        var testMod = neoForge.getMods().maybeCreate("test");
+        var almostGradle = this.project.getExtensions().getByType(AlmostGradleExtension.class);
+        var mainMod = neoForge.getMods().maybeCreate(almostGradle.getModId());
         var mainSourceSet = java.getSourceSets().getByName("main");
-        var testSourceSet = java.getSourceSets().getByName("test");
 
         var dep = settings.getDependency();
         var apiDep = settings.getApiDependency();
@@ -109,7 +109,10 @@ public abstract class RecipeViewers {
             Set<ModModel> loadedMods = new HashSet<>();
             loadedMods.add(mainMod);
 
-            if (settings.getTestMod().get()) {
+            if (almostGradle.getTestMod().get() && settings.getTestMod().get()) {
+                var testMod = neoForge.getMods().maybeCreate(AlmostGradleExtension.TESTMOD_ID);
+                var testSourceSet = java.getSourceSets().getByName("test");
+
                 compileClasspath = compileClasspath.plus(testSourceSet.getCompileClasspath());
                 runtimeClasspath = runtimeClasspath.plus(testSourceSet.getRuntimeClasspath());
                 loadedMods.add(testMod);
