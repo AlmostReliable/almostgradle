@@ -5,7 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog], and this project adheres to [Semantic Versioning].
 
 ## Unreleased
-- /
+
+- added option for disable loading the test mod in recipe viewer run configs
+- fixed recipe viewer run configs not loading the test source set and not executing compile tasks
 
 ## [1.2.0] - 2025-04-17
 

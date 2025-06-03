@@ -1,6 +1,8 @@
 package com.almostreliable.almostgradle.dependency;
 
+import com.almostreliable.almostgradle.AlmostGradleExtension;
 import com.almostreliable.almostgradle.Utils;
+import net.neoforged.moddevgradle.dsl.ModModel;
 import net.neoforged.moddevgradle.dsl.NeoForgeExtension;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
@@ -11,6 +13,8 @@ import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.Internal;
 
 import javax.inject.Inject;
+import java.util.HashSet;
+import java.util.Set;
 
 public abstract class RecipeViewers {
 
@@ -73,6 +77,7 @@ public abstract class RecipeViewers {
         Utils.log(project, "\t* Version", settings.getVersion().get());
         Utils.log(project, "\t* Mode", settings.getMode().get().toString());
         Utils.log(project, "\t* Run Config Enabled", settings.getRunConfig().get());
+        Utils.log(project, "\t* Test Mod Enabled", settings.getTestMod().get());
         Utils.log(project, "\t* Minecraft Version", settings.getMinecraftVersion().orElse("NOT_DEFINED").get());
         Utils.log(project, "\t* Repository", settings.getMavenRepository().get());
 
@@ -86,6 +91,8 @@ public abstract class RecipeViewers {
 
         var neoForge = this.project.getExtensions().getByType(NeoForgeExtension.class);
         var java = this.project.getExtensions().getByType(JavaPluginExtension.class);
+        var almostGradle = this.project.getExtensions().getByType(AlmostGradleExtension.class);
+        var mainMod = neoForge.getMods().maybeCreate(almostGradle.getModId());
         var mainSourceSet = java.getSourceSets().getByName("main");
 
         var dep = settings.getDependency();
@@ -93,13 +100,32 @@ public abstract class RecipeViewers {
 
         if (settings.getRunConfig().isPresent() && settings.getRunConfig().get()) {
             var sourceSet = java.getSourceSets().create(mod.id() + "Run");
-            sourceSet.setCompileClasspath(sourceSet.getCompileClasspath().plus(mainSourceSet.getCompileClasspath()));
-            sourceSet.setRuntimeClasspath(sourceSet.getRuntimeClasspath().plus(mainSourceSet.getRuntimeClasspath()));
+
+            var compileClasspath = sourceSet.getCompileClasspath()
+                    .plus(mainSourceSet.getCompileClasspath());
+            var runtimeClasspath = sourceSet.getRuntimeClasspath()
+                    .plus(mainSourceSet.getRuntimeClasspath());
+
+            Set<ModModel> loadedMods = new HashSet<>();
+            loadedMods.add(mainMod);
+
+            if (almostGradle.getTestMod().get() && settings.getTestMod().get()) {
+                var testMod = neoForge.getMods().maybeCreate(AlmostGradleExtension.TESTMOD_ID);
+                var testSourceSet = java.getSourceSets().getByName("test");
+
+                compileClasspath = compileClasspath.plus(testSourceSet.getCompileClasspath());
+                runtimeClasspath = runtimeClasspath.plus(testSourceSet.getRuntimeClasspath());
+                loadedMods.add(testMod);
+            }
+
+            sourceSet.setCompileClasspath(compileClasspath);
+            sourceSet.setRuntimeClasspath(runtimeClasspath);
 
             neoForge.getRuns().create(sourceSet.getName(), (run) -> {
                 run.getIdeName().set("RecipeViewer (" + mod.id().toUpperCase() + ")");
                 run.client();
                 run.getSourceSet().set(sourceSet);
+                run.getLoadedMods().set(loadedMods);
             });
 
             var config = Utils.createLocalRuntime(project,
