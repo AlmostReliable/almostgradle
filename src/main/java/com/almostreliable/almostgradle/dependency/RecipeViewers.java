@@ -11,6 +11,7 @@ import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.Internal;
 
 import javax.inject.Inject;
+import java.util.Set;
 
 public abstract class RecipeViewers {
 
@@ -56,13 +57,13 @@ public abstract class RecipeViewers {
     }
 
     @Internal
-    public void createRuns() {
-        createRun(emi, ModDependency.EMI);
-        createRun(jei, ModDependency.JEI);
-        createRun(rei, ModDependency.REI);
+    public void createRuns(String mainModId) {
+        createRun(mainModId, emi, ModDependency.EMI);
+        createRun(mainModId, jei, ModDependency.JEI);
+        createRun(mainModId, rei, ModDependency.REI);
     }
 
-    private void createRun(RecipeViewerOptions settings, ModDependency mod) {
+    private void createRun(String mainModId, RecipeViewerOptions settings, ModDependency mod) {
         if (!settings.getVersion().isPresent()) {
             return;
         }
@@ -86,20 +87,28 @@ public abstract class RecipeViewers {
 
         var neoForge = this.project.getExtensions().getByType(NeoForgeExtension.class);
         var java = this.project.getExtensions().getByType(JavaPluginExtension.class);
+        var mainMod = neoForge.getMods().maybeCreate(mainModId);
+        var testMod = neoForge.getMods().maybeCreate("test");
         var mainSourceSet = java.getSourceSets().getByName("main");
+        var testSourceSet = java.getSourceSets().getByName("test");
 
         var dep = settings.getDependency();
         var apiDep = settings.getApiDependency();
 
         if (settings.getRunConfig().isPresent() && settings.getRunConfig().get()) {
             var sourceSet = java.getSourceSets().create(mod.id() + "Run");
-            sourceSet.setCompileClasspath(sourceSet.getCompileClasspath().plus(mainSourceSet.getCompileClasspath()));
-            sourceSet.setRuntimeClasspath(sourceSet.getRuntimeClasspath().plus(mainSourceSet.getRuntimeClasspath()));
+            sourceSet.setCompileClasspath(sourceSet.getCompileClasspath()
+                    .plus(mainSourceSet.getCompileClasspath())
+                    .plus(testSourceSet.getCompileClasspath()));
+            sourceSet.setRuntimeClasspath(sourceSet.getRuntimeClasspath()
+                    .plus(mainSourceSet.getRuntimeClasspath())
+                    .plus(testSourceSet.getRuntimeClasspath()));
 
             neoForge.getRuns().create(sourceSet.getName(), (run) -> {
                 run.getIdeName().set("RecipeViewer (" + mod.id().toUpperCase() + ")");
                 run.client();
                 run.getSourceSet().set(sourceSet);
+                run.getLoadedMods().set(Set.of(mainMod, testMod)); // set loaded mods to avoid confusion
             });
 
             var config = Utils.createLocalRuntime(project,

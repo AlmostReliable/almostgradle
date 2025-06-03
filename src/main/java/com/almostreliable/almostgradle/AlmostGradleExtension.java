@@ -120,7 +120,7 @@ public abstract class AlmostGradleExtension {
         applyApiSourceSet();
         applyBasicMod();
         applyTestMod();
-        getRecipeViewers().createRuns();
+        getRecipeViewers().createRuns(getModId());
         onPostRunConfigs();
     }
 
