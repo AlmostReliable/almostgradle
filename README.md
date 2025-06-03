@@ -336,12 +336,14 @@ Possible values are:
 - `full` - load the full mod into the compile time classpath
 - `none` - don't load anything into the compile time classpath
 
-*Run Config* refers to whether a run configuration should be created for the recipe viewer.
+*Run Config* refers to whether a run configuration should be created for the recipe viewer. If *Run Config* is enabled,
+the option *Test Mod* defines whether the test mod should be loaded in that run configuration.
 
 ### Defaults:
 
 Mode: `none`<br>
 Run Config: `false`<br>
+Test Mod: `true`<br>
 Minecraft Version: same as project<br>
 Maven Repository: default for the respective recipe viewer
 
@@ -365,6 +367,7 @@ almostgradle.setup {
             runConfig = true
             mode = LoadingMode.FULL
             version = "x.x.x"
+            testMod = false
         }
         jei {
             runConfig = false
@@ -391,6 +394,7 @@ almostgradle.recipeViewers.emi.maven = https://modmaven.dev
 almostgradle.recipeViewers.rei.runConfig = true
 almostgradle.recipeViewers.rei.mode = FULL
 almostgradle.recipeViewers.rei.version = x.x.x
+almostgradle.recipeViewers.rei.testMod = false
 
 almostgradle.recipeViewers.jei.runConfig = true
 almostgradle.recipeViewers.jei.mode = API
