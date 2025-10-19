@@ -86,6 +86,8 @@ public interface ModDependency {
         public Iterable<Dependency> createApiDependencies(String minecraftVersion, String depVersion, DependencyFactory factory) {
             return List.of(
                     factory.create("mezz.jei", "jei-" + minecraftVersion + "-neoforge-api", depVersion)
+                            .setTransitive(false),
+                    factory.create("mezz.jei", "jei-" + minecraftVersion + "-common-api", depVersion)
                             .setTransitive(false)
             );
         }
