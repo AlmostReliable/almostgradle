@@ -95,8 +95,8 @@ public abstract class RecipeViewers {
         var mainMod = neoForge.getMods().maybeCreate(almostGradle.getModId());
         var mainSourceSet = java.getSourceSets().getByName("main");
 
-        var dep = settings.getDependency();
-        var apiDep = settings.getApiDependency();
+        var deps = settings.getDependencies();
+        var apiDeps = settings.getApiDependencies();
 
         if (settings.getRunConfig().isPresent() && settings.getRunConfig().get()) {
             var sourceSet = java.getSourceSets().create(mod.id() + "Run");
@@ -131,7 +131,7 @@ public abstract class RecipeViewers {
             var config = Utils.createLocalRuntime(project,
                     sourceSet.getRuntimeClasspathConfigurationName(),
                     mod.id());
-            config.withDependencies(d -> d.addLater(dep));
+            config.withDependencies(d -> d.addAllLater(deps));
         }
 
         var runtimeOnly = project.getConfigurations().getByName("localRuntime");
@@ -141,10 +141,10 @@ public abstract class RecipeViewers {
 
         switch (settings.getMode().get()) {
             case API -> {
-                compileOnly.withDependencies(d -> d.addLater(apiDep));
+                compileOnly.withDependencies(d -> d.addAllLater(apiDeps));
             }
             case FULL -> {
-                compileOnly.withDependencies(d -> d.addLater(dep));
+                compileOnly.withDependencies(d -> d.addAllLater(deps));
             }
         }
     }

@@ -3,7 +3,7 @@ package com.almostreliable.almostgradle.dependency;
 
 import com.almostreliable.almostgradle.AlmostGradleExtension;
 import org.gradle.api.Project;
-import org.gradle.api.artifacts.ModuleDependency;
+import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.provider.ProviderFactory;
@@ -53,15 +53,15 @@ public abstract class RecipeViewerOptions {
 
     public abstract Property<Boolean> getTestMod();
 
-    public Provider<ModuleDependency> getDependency() {
+    public Provider<Iterable<Dependency>> getDependencies() {
         var almostGradle = project.getExtensions().getByType(AlmostGradleExtension.class);
         var mcv = getMinecraftVersion().orElse(almostGradle.getMinecraftVersion()).get();
-        return getVersion().map(v -> mod.createDependency(mcv, v, project.getDependencyFactory()));
+        return getVersion().map(v -> mod.createDependencies(mcv, v, project.getDependencyFactory()));
     }
 
-    public Provider<ModuleDependency> getApiDependency() {
+    public Provider<Iterable<Dependency>> getApiDependencies() {
         var almostGradle = project.getExtensions().getByType(AlmostGradleExtension.class);
         var mcv = getMinecraftVersion().orElse(almostGradle.getMinecraftVersion()).get();
-        return getVersion().map(v -> mod.createApiDependency(mcv, v, project.getDependencyFactory()));
+        return getVersion().map(v -> mod.createApiDependencies(mcv, v, project.getDependencyFactory()));
     }
 }
