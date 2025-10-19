@@ -1,5 +1,7 @@
 package com.almostreliable.almostgradle;
 
+import com.almostreliable.almostgradle.dependency.RecipeViewerOptions;
+import com.almostreliable.almostgradle.dependency.RecipeViewers;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.JavaPluginExtension;
@@ -9,6 +11,8 @@ import org.gradle.language.jvm.tasks.ProcessResources;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.StreamSupport;
@@ -17,13 +21,20 @@ public class ProcessResourceHandler implements Action<ProcessResources> {
 
     public static final String USER_KEY = "githubUser";
     public static final String REPO_KEY = "githubRepo";
+    public static final Map<String, Function<RecipeViewers, RecipeViewerOptions>> RECIPE_VIEWER_VERSIONS = Map.of(
+            "jeiVersion", RecipeViewers::getJei,
+            "emiVersion", RecipeViewers::getEmi,
+            "reiVersion", RecipeViewers::getRei
+    );
 
     private final List<String> targets = List.of("META-INF/neoforge.mods.toml", "pack.mcmeta");
 
     private final Project project;
+    private final RecipeViewers recipeViewers;
 
-    public ProcessResourceHandler(Project project) {
+    public ProcessResourceHandler(Project project, RecipeViewers recipeViewers) {
         this.project = project;
+        this.recipeViewers = recipeViewers;
     }
 
     @Override
@@ -92,9 +103,34 @@ public class ProcessResourceHandler implements Action<ProcessResources> {
                         "\t* Property '" + USER_KEY + "' found in target but not set, defaulting to 'AlmostReliable'");
                 return Optional.of("AlmostReliable");
             }
+
+            for (var entry : RECIPE_VIEWER_VERSIONS.entrySet()) {
+                var viewerVersion = getRecipeViewerVersion(
+                        key,
+                        entry.getKey(),
+                        () -> entry.getValue().apply(recipeViewers)
+                );
+                if (viewerVersion.isPresent()) {
+                    return viewerVersion;
+                }
+            }
         }
 
         return Optional.ofNullable(property).map(Object::toString);
+    }
+
+    private Optional<String> getRecipeViewerVersion(String key, String viewerKey, Supplier<RecipeViewerOptions> recipeViewerOptions) {
+        if (key.equals(viewerKey)) {
+            var version = recipeViewerOptions.get().getVersion();
+            if (version.isPresent()) {
+                return Optional.of(version.get());
+            }
+
+            var logger = project.getLogger();
+            logger.lifecycle("\t* Property '" + viewerKey + "' found in target but the recipe viewer is not enabled");
+        }
+
+        return Optional.empty();
     }
 
     private Map<String, String> createProperties(Collection<String> keys) {
