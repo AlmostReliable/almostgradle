@@ -129,7 +129,7 @@ public abstract class AlmostGradleExtension {
             project
                     .getTasks()
                     .named("processResources", ProcessResources.class)
-                    .configure(new ProcessResourceHandler(project));
+                    .configure(new ProcessResourceHandler(project, getRecipeViewers()));
         }
     }
 

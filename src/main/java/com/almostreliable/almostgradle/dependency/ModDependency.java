@@ -1,7 +1,9 @@
 package com.almostreliable.almostgradle.dependency;
 
-import org.gradle.api.artifacts.ModuleDependency;
+import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.dsl.DependencyFactory;
+
+import java.util.List;
 
 @SuppressWarnings("UnstableApiUsage")
 public interface ModDependency {
@@ -13,9 +15,9 @@ public interface ModDependency {
 
     String defaultMavenRepo();
 
-    ModuleDependency createApiDependency(String minecraftVersion, String depVersion, DependencyFactory factory);
+    Iterable<Dependency> createApiDependencies(String minecraftVersion, String depVersion, DependencyFactory factory);
 
-    ModuleDependency createDependency(String minecraftVersion, String depVersion, DependencyFactory factory);
+    Iterable<Dependency> createDependencies(String minecraftVersion, String depVersion, DependencyFactory factory);
 
     class Emi implements ModDependency {
         @Override
@@ -29,13 +31,17 @@ public interface ModDependency {
         }
 
         @Override
-        public ModuleDependency createApiDependency(String minecraftVersion, String depVersion, DependencyFactory factory) {
-            return factory.create("dev.emi", "emi-neoforge", depVersion + "+" + minecraftVersion, "api", null);
+        public Iterable<Dependency> createApiDependencies(String minecraftVersion, String depVersion, DependencyFactory factory) {
+            return List.of(
+                    factory.create("dev.emi", "emi-neoforge", depVersion + "+" + minecraftVersion, "api", null)
+            );
         }
 
         @Override
-        public ModuleDependency createDependency(String minecraftVersion, String depVersion, DependencyFactory factory) {
-            return factory.create("dev.emi", "emi-neoforge", depVersion + "+" + minecraftVersion);
+        public Iterable<Dependency> createDependencies(String minecraftVersion, String depVersion, DependencyFactory factory) {
+            return List.of(
+                    factory.create("dev.emi", "emi-neoforge", depVersion + "+" + minecraftVersion)
+            );
         }
     }
 
@@ -51,13 +57,17 @@ public interface ModDependency {
         }
 
         @Override
-        public ModuleDependency createApiDependency(String minecraftVersion, String depVersion, DependencyFactory factory) {
-            return factory.create("me.shedaniel", "RoughlyEnoughItems-api-neoforge", depVersion);
+        public Iterable<Dependency> createApiDependencies(String minecraftVersion, String depVersion, DependencyFactory factory) {
+            return List.of(
+                    factory.create("me.shedaniel", "RoughlyEnoughItems-api-neoforge", depVersion)
+            );
         }
 
         @Override
-        public ModuleDependency createDependency(String minecraftVersion, String depVersion, DependencyFactory factory) {
-            return factory.create("me.shedaniel", "RoughlyEnoughItems-neoforge", depVersion);
+        public Iterable<Dependency> createDependencies(String minecraftVersion, String depVersion, DependencyFactory factory) {
+            return List.of(
+                    factory.create("me.shedaniel", "RoughlyEnoughItems-neoforge", depVersion)
+            );
         }
     }
 
@@ -73,15 +83,20 @@ public interface ModDependency {
         }
 
         @Override
-        public ModuleDependency createApiDependency(String minecraftVersion, String depVersion, DependencyFactory factory) {
-            return factory
-                    .create("mezz.jei", "jei-" + minecraftVersion + "-neoforge-api", depVersion)
-                    .setTransitive(false);
+        public Iterable<Dependency> createApiDependencies(String minecraftVersion, String depVersion, DependencyFactory factory) {
+            return List.of(
+                    factory.create("mezz.jei", "jei-" + minecraftVersion + "-neoforge-api", depVersion)
+                            .setTransitive(false),
+                    factory.create("mezz.jei", "jei-" + minecraftVersion + "-common-api", depVersion)
+                            .setTransitive(false)
+            );
         }
 
         @Override
-        public ModuleDependency createDependency(String minecraftVersion, String depVersion, DependencyFactory factory) {
-            return factory.create("mezz.jei", "jei-" + minecraftVersion + "-neoforge", depVersion).setTransitive(false);
+        public Iterable<Dependency> createDependencies(String minecraftVersion, String depVersion, DependencyFactory factory) {
+            return List.of(
+                    factory.create("mezz.jei", "jei-" + minecraftVersion + "-neoforge", depVersion).setTransitive(false)
+            );
         }
     }
 }

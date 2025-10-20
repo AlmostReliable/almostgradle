@@ -415,6 +415,9 @@ dependency {
 }
 ```
 
+If you depend on a recipe viewer at compile time and need a version range, the specified recipe viewer version can be
+accessed via the `<viewer>Version` property. For example `versionRange = "[${jeiVersion},)"`.
+
 # Configurations
 
 Next to the default ones, the plugin offers additional configurations to load dependencies into the classpath.
