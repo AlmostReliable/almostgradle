@@ -20,7 +20,7 @@ buildscript {
 }
 
 dependencies {
-    compileOnly(libs.buildconfig)
+    implementation(libs.buildconfig)
     compileOnly(libs.moddevgradle)
 }
 
