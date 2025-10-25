@@ -5,6 +5,9 @@ plugins {
     alias(libs.plugins.plugin.publish)
 }
 
+val minimumGradleVersion: String by project
+val minimumMdgVersion: String by project
+
 repositories {
     gradlePluginPortal()
 }
@@ -34,6 +37,9 @@ tasks {
 
 buildConfig {
     buildConfigField("String", "VERSION", "\"${project.version}\"")
+    buildConfigField("String", "BUILDCONFIG_VERSION", "\"${libs.versions.buildconfig.get()}\"")
+    buildConfigField("String", "MINIMUM_GRADLE_VERSION", "\"$minimumGradleVersion\"")
+    buildConfigField("String", "MINIMUM_MDG_VERSION", "\"$minimumMdgVersion\"")
 }
 
 gradlePlugin {

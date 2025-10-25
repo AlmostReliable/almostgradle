@@ -101,8 +101,8 @@ public abstract class AlmostGradleExtension {
     }
 
     public void setup(Action<AlmostGradleExtension> onSetup) {
-        Utils.ensureMinimalGradleVersion(project, "8.12.1");
-        Utils.ensureMinimalPluginVersion(project, "net.neoforged.moddev", "2.0.64-beta");
+        Utils.ensureMinimalGradleVersion(project, BuildConfig.MINIMUM_GRADLE_VERSION);
+        Utils.ensureMinimalPluginVersion(project, "net.neoforged.moddev", BuildConfig.MINIMUM_MDG_VERSION);
 
         onSetup.execute(this);
         log("📕Setting up project through AlmostGradle v" + BuildConfig.VERSION + " ...");
@@ -281,9 +281,8 @@ public abstract class AlmostGradleExtension {
 
         try {
             String id = "com.github.gmazzo.buildconfig";
-            String v = "5.4.0";
             if (!this.project.getPlugins().hasPlugin(id)) {
-                project.getBuildscript().getDependencies().add("classpath", id + ":" + v);
+                project.getBuildscript().getDependencies().add("classpath", id + ":" + BuildConfig.BUILDCONFIG_VERSION);
                 project.getPlugins().apply(id);
             }
 
