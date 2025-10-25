@@ -5,7 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog], and this project adheres to [Semantic Versioning].
 
 ## Unreleased
-- /
+
+- added plugin version output to setup log messages
+- added possibility to load multiple dependencies for recipe viewers ([#4](https://github.com/AlmostReliable/almostgradle/pull/4))
+- added automatically injected placeholders to specify recipe viewer minimum version constraints ([#4](https://github.com/AlmostReliable/almostgradle/pull/4))
+- fixed JEI recipe viewer not loading the common API sources ([#4](https://github.com/AlmostReliable/almostgradle/pull/4))
+- changed resize client launch argument to be enabled by default
 
 ## [1.3.0] - 2025-06-03
 
