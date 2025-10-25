@@ -150,7 +150,7 @@ This launch argument will resize all client run configurations to `1920x1080`.
 
 #### Defaults:
 
-Enabled: `false`
+Enabled: `true`
 
 #### Configuration:
 

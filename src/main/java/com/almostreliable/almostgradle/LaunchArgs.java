@@ -17,7 +17,7 @@ public abstract class LaunchArgs {
         getResizeClient().convention(providers
                 .gradleProperty(prefix + "resizeClient")
                 .map(Boolean::parseBoolean)
-                .orElse(false));
+                .orElse(true));
         getAutoWorldJoin().set(providers.gradleProperty(prefix + "autoWorldJoin").map(s -> {
             if (s.equals("true")) return true;
             if (s.equals("false")) return false;
