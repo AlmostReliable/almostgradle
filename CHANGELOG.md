@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog], and this project adheres to [Semantic Versioning].
 
 ## Unreleased
+- /
+
+## [1.4.0] - 2025-10-25
 
 - added plugin version output to setup log messages
 - added possibility to load multiple dependencies for recipe viewers ([#4](https://github.com/AlmostReliable/almostgradle/pull/4))
@@ -56,3 +59,4 @@ Initial release.
 [1.1.1]: https://github.com/AlmostReliable/almostgradle/releases/tag/v1.1.1
 [1.2.0]: https://github.com/AlmostReliable/almostgradle/releases/tag/v1.2.0
 [1.3.0]: https://github.com/AlmostReliable/almostgradle/releases/tag/v1.3.0
+[1.4.0]: https://github.com/AlmostReliable/almostgradle/releases/tag/v1.4.0
