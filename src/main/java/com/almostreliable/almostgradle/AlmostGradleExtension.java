@@ -48,9 +48,12 @@ public abstract class AlmostGradleExtension {
         getWithSourcesJar().convention(true);
         getBuildConfig().convention(true);
         getProcessResources().set(true);
+        getInterfaceInjection().convention(false);
     }
 
     public abstract Property<Boolean> getProcessResources();
+
+    public abstract Property<Boolean> getInterfaceInjection();
 
     public abstract Property<Boolean> getWithSourcesJar();
 
@@ -120,6 +123,7 @@ public abstract class AlmostGradleExtension {
         applyApiSourceSet();
         applyBasicMod();
         applyTestMod();
+        applyInterfaceInjection();
         getRecipeViewers().createRuns();
         onPostRunConfigs();
 
@@ -350,6 +354,35 @@ public abstract class AlmostGradleExtension {
                 run.systemProperty(modId + ".example_scripts", exampleScripts);
             });
         });
+    }
+
+    private void applyInterfaceInjection() {
+        if (!getInterfaceInjection().get()) {
+            return;
+        }
+
+        var neoForge = this.project.getExtensions().getByType(NeoForgeExtension.class);
+        var outputPath = project.file("src/main/resources/interfaces.json");
+
+//        neoForge.setInterfaceInjectionData(outputPath);
+
+        String packageName = (project.getGroup() + "." + getModId()).replace('.', '/');
+        var task = project
+                .getTasks()
+                .register("generateInterfaceInjectionJson", InterfaceInjectionGenerator.class, t -> {
+                    t.setGroup("almostgradle");
+                    t.setDescription("Generates the interfaces.json file for interface injection");
+                    t.dependsOn("classes");
+                    t
+                            .getMixinDir()
+                            .set(project
+                                    .getLayout()
+                                    .getBuildDirectory()
+                                    .dir("classes/java/main/" + packageName + "/mixin"));
+                    t.getOutputFile().set(outputPath);
+                });
+
+        project.getTasks().named("jar").configure(jar -> jar.dependsOn(task));
     }
 
     public String getProperty(String propertyName) {
