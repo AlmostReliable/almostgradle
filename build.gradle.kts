@@ -30,6 +30,11 @@ tasks {
     withType<Javadoc> {
         enabled = false
     }
+    named<Jar>("jar") {
+        evaluationDependsOn(":annotation_processor")
+        from(project(":annotation_processor").sourceSets.main.get().output)
+        dependsOn(":annotation_processor:classes")
+    }
 }
 
 buildConfig {

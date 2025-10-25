@@ -122,6 +122,8 @@ public abstract class AlmostGradleExtension {
         applyTestMod();
         getRecipeViewers().createRuns();
         onPostRunConfigs();
+
+        project.getDependencies().add("annotationProcessor", "com.almostreliable:almostgradle:1.3.2");
     }
 
     private void createProcessResourcesTask() {
