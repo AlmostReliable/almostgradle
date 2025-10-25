@@ -47,7 +47,7 @@ jobs:
           UPDATE_TYPE: ${{ inputs.update_type }}
         run: |
           echo "getting current version"
-          CURRENT_VERSION=$(grep -oP '^version\s*=\s*"\K[^"]*' build.gradle.kts)
+          CURRENT_VERSION=$(grep -oP '^version\s*=\s*"\K[^"]*' gradle.properties)
           echo "detected current version: $CURRENT_VERSION"
 
           if [[ -z "$CURRENT_VERSION" ]]; then
@@ -88,12 +88,12 @@ jobs:
         env:
           VERSION: ${{ steps.version.outputs.VERSION }}
         run: |
-          if grep -q "^version\s*=\s*\"$VERSION\"" build.gradle.kts; then
+          if grep -q "^version\s*=\s*\"$VERSION\"" gradle.properties; then
             echo "version is already set"
           else
-            echo "version is outdated, adjusting build.gradle.kts"
-            sed -i "s/^version\s*=.*$/version = \"$VERSION\"/g" build.gradle.kts
-            git diff build.gradle.kts
+            echo "version is outdated, adjusting gradle.properties"
+            sed -i "s/^version\s*=.*$/version = \"$VERSION\"/g" gradle.properties
+            git diff gradle.properties
           fi
 
       - name: Check and adjust changelog
@@ -123,7 +123,7 @@ jobs:
       - name: Store commit info
         id: commit_info
         run: |
-          if [[ -n $(git diff --name-only build.gradle.kts CHANGELOG.md) ]]; then
+          if [[ -n $(git diff --name-only gradle.properties CHANGELOG.md) ]]; then
             NEEDS_COMMIT="true"
           else
             NEEDS_COMMIT="false"
@@ -132,7 +132,7 @@ jobs:
           echo "NEEDS_COMMIT=$NEEDS_COMMIT" >> $GITHUB_OUTPUT
 
       - name: Archive results
-        run: tar -zcvf preparation.tar.gz build.gradle.kts CHANGELOG.md
+        run: tar -zcvf preparation.tar.gz gradle.properties CHANGELOG.md
 
       - name: Upload results
         uses: actions/upload-artifact@v4
@@ -283,7 +283,7 @@ jobs:
         with:
           commit_message: "bump version"
           commit_user_name: "AlmostReliable"
-          file_pattern: "build.gradle.kts CHANGELOG.md"
+          file_pattern: "gradle.properties CHANGELOG.md"
 
   plugin-portal-release:
     name: Plugin Portal Release
