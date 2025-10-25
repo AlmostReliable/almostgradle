@@ -1,6 +1,7 @@
 @file:Suppress("UnstableApiUsage")
 
 plugins {
+    alias(libs.plugins.buildconfig)
     alias(libs.plugins.plugin.publish)
 }
 
@@ -29,6 +30,10 @@ tasks {
     withType<Javadoc> {
         enabled = false
     }
+}
+
+buildConfig {
+    buildConfigField("String", "VERSION", "\"${project.version}\"")
 }
 
 gradlePlugin {

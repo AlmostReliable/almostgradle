@@ -4,6 +4,7 @@ moddevgradle = "2.0.80"
 plugin-publish = "1.3.1"
 
 [plugins]
+buildconfig = { id = "com.github.gmazzo.buildconfig", version.ref = "buildconfig" }
 plugin-publish = { id = "com.gradle.plugin-publish", version.ref = "plugin-publish" }
 
 [libraries]
