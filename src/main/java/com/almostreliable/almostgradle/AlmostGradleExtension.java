@@ -280,10 +280,9 @@ public abstract class AlmostGradleExtension {
         }
 
         try {
-            String id = "com.github.gmazzo.buildconfig";
-            if (!this.project.getPlugins().hasPlugin(id)) {
-                project.getBuildscript().getDependencies().add("classpath", id + ":" + BuildConfig.BUILDCONFIG_VERSION);
-                project.getPlugins().apply(id);
+            String buildConfigPluginId = "com.github.gmazzo.buildconfig";
+            if (!project.getPlugins().hasPlugin(buildConfigPluginId)) {
+                project.getPlugins().apply(buildConfigPluginId);
             }
 
             var buildConfig = project.getExtensions().getByType(BuildConfigExtension.class);
