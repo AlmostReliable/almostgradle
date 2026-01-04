@@ -111,6 +111,25 @@ almostgradle.setup {
 }
 ```
 
+## Access Transformer Validation
+
+This feature enables the validation of [access transformers]. Validation includes several checks, such as checking
+if all children of a class are transformed if the parent is transformed.
+
+### Defaults:
+
+Enabled: `true`
+
+### Configuration:
+
+This feature can be disabled in the `setup` block.
+
+```kts
+almostgradle.setup {
+    withAccessTransformerValidation = false
+}
+```
+
 ## Process Resources
 
 This feature creates a `processResources` task to replace placeholders in resource files. Placeholders are defined as

@@ -49,6 +49,7 @@ public abstract class AlmostGradleExtension {
         }).orElse(false));
 
         getWithSourcesJar().convention(true);
+        getWithAccessTransformerValidation().convention(true);
         getBuildConfig().convention(true);
         getProcessResources().set(true);
     }
@@ -58,6 +59,8 @@ public abstract class AlmostGradleExtension {
     public abstract Property<Boolean> getProcessResources();
 
     public abstract Property<Boolean> getWithSourcesJar();
+
+    public abstract Property<Boolean> getWithAccessTransformerValidation();
 
     public abstract Property<Boolean> getTestMod();
 
@@ -202,6 +205,10 @@ public abstract class AlmostGradleExtension {
         mainMod.sourceSet(mainSourceSet);
         if (getApiSourceSet().get()) {
             mainMod.sourceSet(javaPlugin.getSourceSets().getByName("api"));
+        }
+
+        if (getWithAccessTransformerValidation().get()) {
+            neoForge.getValidateAccessTransformers().set(true);
         }
 
         neoForge.getRuns().create("client", (run) -> {
