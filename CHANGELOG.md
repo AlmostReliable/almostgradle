@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog], and this project adheres to [Semantic Versioning].
 
 ## Unreleased
+- /
+
+## [1.5.0] - 2026-01-04
 
 - added option to set the project Java version, defaults to Java 21
 - added option to validate access transformers, enabled by default
@@ -69,3 +72,4 @@ Initial release.
 [1.3.0]: https://github.com/AlmostReliable/almostgradle/releases/tag/v1.3.0
 [1.4.0]: https://github.com/AlmostReliable/almostgradle/releases/tag/v1.4.0
 [1.4.1]: https://github.com/AlmostReliable/almostgradle/releases/tag/v1.4.1
+[1.5.0]: https://github.com/AlmostReliable/almostgradle/releases/tag/v1.5.0
