@@ -14,6 +14,7 @@ import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.maven.MavenPublication;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.jvm.tasks.Jar;
+import org.gradle.jvm.toolchain.JavaLanguageVersion;
 import org.gradle.language.jvm.tasks.ProcessResources;
 
 import javax.inject.Inject;
@@ -24,6 +25,7 @@ public abstract class AlmostGradleExtension {
     public static final String NAME = "almostgradle";
     public static final String MAVEN = "mavenJava";
     public static final String TESTMOD_ID = "testmod";
+    public static final int DEFAULT_JAVA_VERSION = 21;
 
     private final Project project;
     private final RecipeViewers recipeViewers;
@@ -36,6 +38,7 @@ public abstract class AlmostGradleExtension {
         this.launchArgs = project.getObjects().newInstance(LaunchArgs.class);
         var providers = project.getProviders();
 
+        getJavaVersion().convention(DEFAULT_JAVA_VERSION);
         getTestMod().convention(false);
         getApiSourceSet().convention(false);
         getMavenPublish().convention(false);
@@ -49,6 +52,8 @@ public abstract class AlmostGradleExtension {
         getBuildConfig().convention(true);
         getProcessResources().set(true);
     }
+
+    public abstract Property<Integer> getJavaVersion();
 
     public abstract Property<Boolean> getProcessResources();
 
@@ -260,6 +265,9 @@ public abstract class AlmostGradleExtension {
 
         BasePluginExtension base = project.getExtensions().getByType(BasePluginExtension.class);
         base.getArchivesName().set(getModId() + "-neoforge");
+
+        JavaPluginExtension java = project.getExtensions().getByType(JavaPluginExtension.class);
+        java.toolchain(spec -> spec.getLanguageVersion().set(JavaLanguageVersion.of(getJavaVersion().get())));
 
         if (getWithSourcesJar().get()) {
             var javaPlugin = project.getExtensions().getByType(JavaPluginExtension.class);

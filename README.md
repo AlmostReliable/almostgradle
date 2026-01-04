@@ -59,6 +59,7 @@ After specifying the required entries and calling the `setup` method, Almost Gra
     - set the project group
     - set the project version as `minecraftVersion-modVersion`
     - set the base archive name to `modId-neoforge`
+    - [set the Java version to `21`]
     - [enable generation of a source JAR](#sources-jar)
 - [process resources](#process-resources)
     - collect all placeholder properties from resource files
@@ -72,6 +73,24 @@ After specifying the required entries and calling the `setup` method, Almost Gra
     - ensure that the default run configurations `client` and `server` only load the main mod
 
 The behavior of this process and additional features can be modified by the following configuration options.
+
+## Java Version
+
+This feature sets the Java version for the project.
+
+### Defaults:
+
+Java Version: `21`
+
+### Configuration:
+
+The target version can be modified in the `setup` block.
+
+```kts
+almostgradle.setup {
+    javaVersion = 17
+}
+```
 
 ## Sources Jar
 

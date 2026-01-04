@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 
 ## Unreleased
 
+- added option to set the project Java version, defaults to Java 21
 - removed explicit loading of the BuildConfig plugin
 - fixed classpath being resolved too early
 
