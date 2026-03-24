@@ -63,19 +63,29 @@ public class ProcessResourceHandler implements Action<ProcessResources> {
                 .getByName(SourceSet.MAIN_SOURCE_SET_NAME);
         List<File> files = getTargetFilesInSourceSet(mainSourceSet);
 
+        Set<String> commentedProperties = new HashSet<>();
         for (File file : files) {
             try (var reader = new Scanner(file)) {
                 while (reader.hasNextLine()) {
                     String line = reader.nextLine();
-                    if (line.trim().startsWith("#")) continue;
                     Matcher matcher = pattern.matcher(line);
                     while (matcher.find()) {
-                        keys.add(matcher.group(1));
+                        var match = matcher.group(1);
+                        if (line.trim().startsWith("#") && !keys.contains(match)) {
+                            commentedProperties.add(match);
+                            continue;
+                        }
+                        keys.add(match);
+                        commentedProperties.remove(match);
                     }
                 }
             } catch (FileNotFoundException e) {
                 throw new RuntimeException(e);
             }
+        }
+
+        if (!commentedProperties.isEmpty()) {
+            throw new IllegalStateException("Found commented properties! Gradle will still try to resolve these. To exclude them from Gradle property expansion, remove the '$' symbols. " + commentedProperties);
         }
 
         return keys.stream().sorted().toList();
