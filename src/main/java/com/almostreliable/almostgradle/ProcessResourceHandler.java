@@ -67,6 +67,7 @@ public class ProcessResourceHandler implements Action<ProcessResources> {
             try (var reader = new Scanner(file)) {
                 while (reader.hasNextLine()) {
                     String line = reader.nextLine();
+                    if (line.trim().startsWith("#")) continue;
                     Matcher matcher = pattern.matcher(line);
                     while (matcher.find()) {
                         keys.add(matcher.group(1));
