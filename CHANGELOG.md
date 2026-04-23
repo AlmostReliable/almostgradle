@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 
 ## Unreleased
 
+**Note**: This release is a new major version and includes breaking changes.
+
 - added support for NeoForge test framework
 - added support for JUnit tests
 - changed test mod definition to decouple it from vanilla game tests

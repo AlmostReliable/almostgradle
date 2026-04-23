@@ -23,8 +23,8 @@ automatically apply the [ModDevGradle] plugin, allowing to choose its version ma
 
 ```kts
 plugins {
-    id("net.neoforged.moddev") version "2.0.+"
-    id("com.almostreliable.almostgradle") version "1.0.+"
+    id("net.neoforged.moddev") version "2.0.138"
+    id("com.almostreliable.almostgradle") version "1.5.2"
 }
 ```
 
@@ -33,10 +33,7 @@ plugins {
 Almost Gradle offers an automated setup for common use cases. The following example shows the minimal setup.
 
 ```kts
-plugins {
-    id("net.neoforged.moddev") version "2.0.+"
-    id("com.almostreliable.almostgradle") version "1.0.+"
-}
+// plugin block
 
 almostgradle.setup {}
 ```
@@ -80,7 +77,7 @@ This feature sets the Java version for the project.
 
 ### Defaults:
 
-Java Version: `21`
+Java Version: `25`
 
 ### Configuration:
 
@@ -88,7 +85,7 @@ The target version can be modified in the `setup` block.
 
 ```kts
 almostgradle.setup {
-    javaVersion = 17
+    javaVersion = 21
 }
 ```
 
@@ -154,6 +151,9 @@ almostgradle.setup {
 
 This feature generates a class with mod constants. To achieve this, Almost Gradle internally uses the [Build Config]
 plugin. When the `build` task is invoked, the [Build Config] class will be generated.
+
+It is highly recommended to change the `package` property to your actual package name if your package structure does not
+use your `modId` as the root package. This allows using the generated build config class without any imports.
 
 ### Defaults:
 
@@ -329,14 +329,36 @@ almostgradle.setup {
 }
 ```
 
-## Test Mod
+## Tests
 
-This feature creates a test mod with its own run configuration. It will use the default `test` source set. An additional
-run configuration is created for running game tests. The game directory is set to a temporary folder inside the build
-directory to avoid crashes with file-based runtime mods. If you rely on runtime mods in the game tests, they have to be
-loaded via Gradle.
+This feature allows configuration of different test methods. Whether it's to add additional content in a separate test
+mod for local testing, or full automation using game or unit tests.
 
-The test mod requires a main mod class and its own `neoforge.mods.toml` file. It should look like this:
+Any of the testing methods can be enabled by specifying it in the `tests` block.
+
+```kts
+almostgradle.setup {
+    tests {
+        // configuration
+    }
+}
+```
+
+### Test Mod
+
+Defines if a test mod and a custom run configuration should be created. This allows to have a separate mod that lives
+in your `test` source set and won't ship to production, which is useful if you want to add additional content that is
+only useful for testing.
+
+The run configuration called `Testmod`will have the main and the test mod loaded. If [game tests](#game-tests) are
+enabled, this run configuration will also have in-game commands that allow you to run game tests manually. The game
+directory for the configuration is set to a temporary folder inside the build directory to avoid crashes with file-based
+runtime mods. If you rely on runtime mods in the test mod, they have to be loaded via Gradle.
+
+#### Requirements
+
+The test mod requires a main mod class annotated with `@Mod` and its own `neoforge.mods.toml` file. It should look
+similar to this:
 
 ```toml
 modLoader = "javafml"
@@ -348,17 +370,108 @@ version = "0.0.0"
 displayName = "Test Mod"
 ```
 
-### Defaults:
+A test mod can also include own mixins.
+
+#### Defaults:
 
 Enabled: `false`
 
-### Configuration:
+#### Configuration:
 
 This feature can be enabled in the `setup` block.
 
 ```kts
 almostgradle.setup {
-    testMod = true
+    tests {
+        testMod = true
+    }
+}
+```
+
+### Game Tests
+
+Defines if the vanilla game test framework should be enabled. Game tests allow you to automate specific scenarios in
+the in-game level and validate behavior. This requires the [Test Mod](#test-mod) to be enabled.
+
+When activated, a new run configuration called `Gametest` will be created. This configuration will start the game test
+server and invoke all game tests annotated with `@GameTest` within the test mod. The game directory for the
+configuration is set to a temporary folder inside the build directory to avoid crashes with file-based runtime mods.
+If you rely on runtime mods in the game tests, they have to be loaded via Gradle.
+
+When this option is enabled, the [Test Mod](#test-mod) run configuration will have in-game commands to start game tests
+manually.
+
+#### Defaults:
+
+Enabled: `false`
+
+#### Configuration:
+
+This feature can be enabled in the `setup` block.
+
+```kts
+almostgradle.setup {
+    tests {
+        gameTests = true
+    }
+}
+```
+
+### Test Framework
+
+Defines if the NeoForge test framework should be loaded into the project. It serves as a great addition to vanilla
+[game tests](#game-tests), but also works on its own. NeoForge uses it to test custom events. It also has useful
+utilities like the `@EmptyTemplate` annotation.
+
+When activated, the dependency will be loaded into the `test` source set.
+
+You can read more about the NeoForge test framework [here](https://github.com/neoforged/NeoForge/blob/26.1.x/docs/TESTFRAMEWORK.md).
+
+#### Defaults:
+
+Enabled: `false`
+
+#### Configuration:
+
+This feature can be enabled in the `setup` block.
+
+```kts
+almostgradle.setup {
+    tests {
+        testFramework = true
+    }
+}
+```
+
+### JUnit
+
+Defines if [JUnit](https://junit.org/) should be loaded into the project and be configured automatically. It's a very
+popular unit testing library for Java. You can write very fast and simple tests that don't require game context.
+
+When activated, the required dependencies will be loaded into the `test` source set. Additionally, the `test` Gradle
+task is altered to use the JUnit platform. That means unit tests are automatically invoked when you use the `build`
+Gradle task.
+
+If the NeoForge [test framework](#test-framework) is enabled, the functionality of unit tests is extended to use an
+ephemeral Minecraft server that loads basic data you can use for testing. This is slimmer than a whole game test, but
+you can't perform in-world tests.
+
+If no [test mod](#test-mod) is enabled, the target mod will be the main mod, but the tests still have to be placed into
+the `test` source set.
+
+#### Defaults:
+
+Enabled: `false`
+
+#### Configuration:
+
+This feature can be enabled in the `setup` block.
+
+```kts
+almostgradle.setup {
+    tests {
+        jUnit = true
+    }
 }
 ```
 
@@ -377,7 +490,7 @@ Possible values are:
 - `none` - don't load anything into the compile time classpath
 
 *Run Config* refers to whether a run configuration should be created for the recipe viewer. If *Run Config* is enabled,
-the option *Test Mod* defines whether the test mod should be loaded in that run configuration.
+the option *Test Mod* defines whether the [test mod](#test-mod) should be loaded in that run configuration.
 
 ### Defaults:
 
