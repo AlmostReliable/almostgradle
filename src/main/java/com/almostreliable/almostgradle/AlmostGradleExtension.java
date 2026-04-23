@@ -25,7 +25,7 @@ public abstract class AlmostGradleExtension {
     public static final String NAME = "almostgradle";
     public static final String MAVEN = "mavenJava";
     public static final String TESTMOD_ID = "testmod";
-    public static final int DEFAULT_JAVA_VERSION = 21;
+    public static final int DEFAULT_JAVA_VERSION = 25;
 
     private final Project project;
     private final RecipeViewers recipeViewers;
