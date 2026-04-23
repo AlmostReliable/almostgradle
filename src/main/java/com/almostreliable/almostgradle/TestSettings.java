@@ -141,7 +141,10 @@ public abstract class TestSettings {
         var launcherDep = project.getDependencyFactory().create("org.junit.platform:junit-platform-launcher");
         testRuntime.withDependencies(d -> d.add(launcherDep));
 
-        project.getTasks().named("test", Test.class, Test::useJUnitPlatform);
+        project.getTasks().named("test", Test.class, test -> {
+            test.useJUnitPlatform();
+            test.exclude(TESTMOD_ID + "/mixin/**");
+        });
 
         var mainMod = neoForge.getMods().maybeCreate(almostGradle.getModId());
         var testMod = neoForge.getMods().maybeCreate(TESTMOD_ID);
