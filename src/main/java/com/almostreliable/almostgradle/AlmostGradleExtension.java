@@ -41,7 +41,6 @@ public abstract class AlmostGradleExtension {
 
         getModPackage().convention(project.getGroup() + "." + getModId());
         getJavaVersion().convention(DEFAULT_JAVA_VERSION);
-        getApiSourceSet().convention(false);
         getMavenPublish().convention(false);
         getDataGen().set(providers.gradleProperty(NAME + ".datagen").map(s -> {
             if (s.equals("true")) return true;
@@ -50,6 +49,7 @@ public abstract class AlmostGradleExtension {
         }).orElse(false));
 
         getWithSourcesJar().convention(true);
+        getWithApiJar().convention(false);
         getWithAccessTransformerValidation().convention(true);
         getBuildConfig().set(providers.gradleProperty(NAME + ".buildconfig").map(s -> {
             if (s.equals("true")) return true;
@@ -67,13 +67,13 @@ public abstract class AlmostGradleExtension {
 
     public abstract Property<Boolean> getWithSourcesJar();
 
+    public abstract Property<Boolean> getWithApiJar();
+
     public abstract Property<Boolean> getWithAccessTransformerValidation();
 
     public abstract Property<Object> getBuildConfig();
 
     public abstract Property<Object> getDataGen();
-
-    public abstract Property<Boolean> getApiSourceSet();
 
     public abstract Property<Boolean> getMavenPublish();
 
@@ -146,7 +146,6 @@ public abstract class AlmostGradleExtension {
 
         createProcessResourcesTask();
         applyBuildConfig();
-        applyApiSourceSet();
         applyBasicMod();
         getTestSettings().apply();
         getRecipeViewers().createRuns();
@@ -171,51 +170,6 @@ public abstract class AlmostGradleExtension {
         });
     }
 
-    private void applyApiSourceSet() {
-        if (!getApiSourceSet().get()) {
-            return;
-        }
-
-        var javaPlugin = project.getExtensions().getByType(JavaPluginExtension.class);
-        var main = javaPlugin.getSourceSets().getByName("main");
-        var api = javaPlugin.getSourceSets().create("api");
-        var neoForge = project.getExtensions().getByType(NeoForgeExtension.class);
-        neoForge.addModdingDependenciesTo(api);
-        project.getDependencies().add(main.getImplementationConfigurationName(), api.getOutput());
-
-        var apiJar = project.getTasks().register("apiJar", Jar.class, jar -> {
-            jar.getArchiveClassifier().set("api");
-            jar.from(api.getOutput());
-        });
-
-        var apiSources = project.getTasks().register("apiSources", Jar.class, jar -> {
-            jar.getArchiveClassifier().set("api-sources");
-            jar.from(api.getAllJava());
-        });
-
-        project.getTasks().named("jar", Jar.class, jar -> {
-            jar.dependsOn(apiJar);
-            jar.from(api.getOutput());
-        });
-
-        project.artifacts(a -> {
-            a.add("archives", apiJar);
-            a.add("archives", apiSources);
-        });
-
-        var maven = project.getExtensions().getByType(PublishingExtension.class);
-        maven.getPublications().withType(MavenPublication.class).configureEach(pub -> {
-            pub.artifact(apiJar);
-            pub.artifact(apiSources);
-        });
-
-        if (getWithSourcesJar().get()) {
-            project.getTasks().named("sourcesJar", Jar.class, jar -> {
-                jar.from(api.getAllJava());
-            });
-        }
-    }
-
     private void applyBasicMod() {
         var neoForge = project.getExtensions().getByType(NeoForgeExtension.class);
         var javaPlugin = project.getExtensions().getByType(JavaPluginExtension.class);
@@ -224,9 +178,6 @@ public abstract class AlmostGradleExtension {
         var mainSourceSet = javaPlugin.getSourceSets().getByName("main");
 
         mainMod.sourceSet(mainSourceSet);
-        if (getApiSourceSet().get()) {
-            mainMod.sourceSet(javaPlugin.getSourceSets().getByName("api"));
-        }
 
         if (getWithAccessTransformerValidation().get()) {
             neoForge.getValidateAccessTransformers().set(true);
@@ -302,12 +253,42 @@ public abstract class AlmostGradleExtension {
             javaPlugin.withSourcesJar();
         }
 
+        if (getWithApiJar().get()) {
+            applyApiJar();
+        }
+
         if (getMavenPublish().get()) {
             project.getPlugins().apply("maven-publish");
             var maven = project.getExtensions().getByType(PublishingExtension.class);
             var pub = maven.getPublications().create(MAVEN, MavenPublication.class);
             pub.from(project.getComponents().getByName("java"));
         }
+    }
+
+    private void applyApiJar() {
+        var javaPlugin = project.getExtensions().getByType(JavaPluginExtension.class);
+        var mainTask = project.getTasks().named("jar", Jar.class);
+        var main = javaPlugin.getSourceSets().getByName("main");
+        var apiPath = getPackage().replace('.', '/') + "/api/**";
+
+        var apiJar = project.getTasks().register("apiJar", Jar.class, jar -> {
+            jar.getArchiveClassifier().set("api");
+            jar.dependsOn(mainTask);
+            jar.from(main.getOutput());
+            jar.include(apiPath);
+        });
+
+        var apiSources = project.getTasks().register("apiSources", Jar.class, jar -> {
+            jar.getArchiveClassifier().set("api-sources");
+            jar.dependsOn(mainTask);
+            jar.from(main.getAllJava());
+            jar.include(apiPath);
+        });
+
+        project.artifacts(a -> {
+            a.add("archives", apiJar);
+            a.add("archives", apiSources);
+        });
     }
 
     private void applyBuildConfig() {

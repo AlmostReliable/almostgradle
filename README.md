@@ -78,6 +78,7 @@ structure. You only need to define this if you make use of one of the features t
 default package is not correct.
 
 Features that currently need this:
+- [API JAR](#api-jar)
 - [Build Config](#build-config)
 
 ### Defaults:
@@ -117,6 +118,29 @@ The target version can be modified in the `setup` block.
 ```kts
 almostgradle.setup {
     javaVersion = 21
+}
+```
+
+## API Jar
+
+This feature enables the generation of an API JAR for the mod. The artifact is generated when the `build` task is
+invoked.
+
+It's assumed that you have an `api` package in your root package. All classes from there are bundled in the API JAR.
+If the package is incorrect, you can use the [Mod Package](#mod-package) option to change it.
+
+### Defaults:
+
+Enabled: `false`
+Mod Package: `group.modId`, e.g. `com.almostreliable.almostunified`
+
+### Configuration:
+
+This feature can be enabled in the `setup` block.
+
+```kts
+almostgradle.setup {
+    withApiJar = true
 }
 ```
 
@@ -188,7 +212,7 @@ If the file generates in the wrong package, you can change the [Mod Package](#mo
 ### Defaults:
 
 Enabled: `true`<br>
-Package: `group.modId`<br>
+Mod Package: `group.modId`, e.g. `com.almostreliable.almostunified`<br>
 Name: `BuildConfig`
 
 ### Configuration:

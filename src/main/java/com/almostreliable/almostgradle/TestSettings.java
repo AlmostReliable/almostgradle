@@ -42,7 +42,7 @@ public abstract class TestSettings {
         }
 
         var logger = project.getLogger();
-        logger.lifecycle("📕Applying test configuration:");
+        logger.lifecycle("📕Applying test configurations:");
         Utils.log(project, "\t* Test Mod", getTestMod().get());
         Utils.log(project, "\t* Game Tests", getGameTests().get());
         Utils.log(project, "\t* Test Framework", getTestFramework().get());

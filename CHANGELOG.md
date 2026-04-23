@@ -11,6 +11,8 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 - added support for NeoForge test framework
 - added support for JUnit tests
 - added global option to change mod package
+- added API JAR option to build JAR and sources from sub-package
+- removed support for dedicated API source set
 - changed test mod definition to decouple it from vanilla game tests
 - changed build config feature to use global mod package path
 - updated internal ModDevGradle version to 2.0.138
