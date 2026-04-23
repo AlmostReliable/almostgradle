@@ -86,6 +86,12 @@ public abstract class TestSettings {
             return;
         }
 
+        if (!getTestMod().get()) {
+            var logger = project.getLogger();
+            logger.error("Game tests can only be enabled with a test mod!");
+            return;
+        }
+
         var java = project.getExtensions().getByType(JavaPluginExtension.class);
         var neoForge = project.getExtensions().getByType(NeoForgeExtension.class);
         var testSourceSet = java.getSourceSets().getByName("test");
