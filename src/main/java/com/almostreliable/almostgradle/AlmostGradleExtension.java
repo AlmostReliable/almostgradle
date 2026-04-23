@@ -40,7 +40,6 @@ public abstract class AlmostGradleExtension {
         var providers = project.getProviders();
 
         getJavaVersion().convention(DEFAULT_JAVA_VERSION);
-        getTestMod().convention(false);
         getApiSourceSet().convention(false);
         getMavenPublish().convention(false);
         getDataGen().set(providers.gradleProperty("datagen").map(s -> {
@@ -62,8 +61,6 @@ public abstract class AlmostGradleExtension {
     public abstract Property<Boolean> getWithSourcesJar();
 
     public abstract Property<Boolean> getWithAccessTransformerValidation();
-
-    public abstract Property<Object> getTestMod();
 
     public abstract Property<Boolean> getBuildConfig();
 
