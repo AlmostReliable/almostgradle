@@ -163,6 +163,27 @@ almostgradle.setup {
 }
 ```
 
+## Maven Publish
+
+This features enables Maven publishing of the project's artifacts. By default, this only publishes to Maven local.
+
+Artifacts include the built JAR, the source JAR if [source JAR](#sources-jar) is enabled, and the API JAR if
+[API JAR](#api-jar) is enabled.
+
+### Defaults:
+
+Enabled: `false`
+
+### Configuration:
+
+This feature can be enabled in the `setup` block.
+
+```kts
+almostgradle.setup {
+    mavenPublish = true
+}
+```
+
 ## Access Transformer Validation
 
 This feature enables the validation of [access transformers]. Validation includes several checks, such as checking
