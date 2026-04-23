@@ -260,9 +260,17 @@ public abstract class AlmostGradleExtension {
         if (getMavenPublish().get()) {
             project.getPlugins().apply("maven-publish");
             var maven = project.getExtensions().getByType(PublishingExtension.class);
+
             var pub = maven.getPublications().create(MAVEN, MavenPublication.class);
-            pub.setArtifactId(getModId());
             pub.from(project.getComponents().getByName("java"));
+            pub.setArtifactId(getModId());
+
+            var apiJar = project.getTasks().named("apiJar", Jar.class);
+            var apiSources = project.getTasks().named("apiSources", Jar.class);
+            maven.getPublications().withType(MavenPublication.class).configureEach(p -> {
+                p.artifact(apiJar);
+                p.artifact(apiSources);
+            });
         }
     }
 
