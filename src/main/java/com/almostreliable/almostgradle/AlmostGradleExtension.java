@@ -24,18 +24,19 @@ import java.util.Set;
 public abstract class AlmostGradleExtension {
     public static final String NAME = "almostgradle";
     public static final String MAVEN = "mavenJava";
-    public static final String TESTMOD_ID = "testmod";
     public static final int DEFAULT_JAVA_VERSION = 25;
 
     private final Project project;
     private final RecipeViewers recipeViewers;
     private final LaunchArgs launchArgs;
+    private final TestSettings testSettings;
 
     @Inject
     public AlmostGradleExtension(Project project) {
         this.project = project;
         this.recipeViewers = project.getObjects().newInstance(RecipeViewers.class);
         this.launchArgs = project.getObjects().newInstance(LaunchArgs.class);
+        this.testSettings = project.getObjects().newInstance(TestSettings.class);
         var providers = project.getProviders();
 
         getJavaVersion().convention(DEFAULT_JAVA_VERSION);
@@ -62,7 +63,7 @@ public abstract class AlmostGradleExtension {
 
     public abstract Property<Boolean> getWithAccessTransformerValidation();
 
-    public abstract Property<Boolean> getTestMod();
+    public abstract Property<Object> getTestMod();
 
     public abstract Property<Boolean> getBuildConfig();
 
@@ -86,6 +87,15 @@ public abstract class AlmostGradleExtension {
 
     public void launchArgs(Action<LaunchArgs> action) {
         action.execute(launchArgs);
+    }
+
+    public TestSettings getTestSettings() {
+        return testSettings;
+    }
+
+    public void tests(Action<TestSettings> action) {
+        testSettings.getEnabled().set(true);
+        action.execute(testSettings);
     }
 
     public String getNeoforgeVersion() {
@@ -127,7 +137,7 @@ public abstract class AlmostGradleExtension {
         applyBuildConfig();
         applyApiSourceSet();
         applyBasicMod();
-        applyTestMod();
+        getTestSettings().apply();
         getRecipeViewers().createRuns();
         onPostRunConfigs();
     }
@@ -323,44 +333,6 @@ public abstract class AlmostGradleExtension {
         } catch (Exception e) {
             project.getLogger().error("... Failed to apply buildconfig", e);
         }
-    }
-
-    private void applyTestMod() {
-        if (!getTestMod().get()) {
-            return;
-        }
-
-        var javaPlugin = this.project.getExtensions().getByType(JavaPluginExtension.class);
-        var neoForge = this.project.getExtensions().getByType(NeoForgeExtension.class);
-        var testSourceSet = javaPlugin.getSourceSets().getByName("test");
-        var modId = this.getModId();
-        neoForge.mods((mods) -> {
-            mods.create(TESTMOD_ID, (mod) -> {
-                mod.sourceSet(testSourceSet);
-            });
-        });
-
-        neoForge.addModdingDependenciesTo(testSourceSet);
-        neoForge.runs((runs) -> {
-            var exampleScripts = this.project.getRootDir().toPath().resolve("example_scripts").toString();
-            runs.create("gametest", (run) -> {
-                run.server();
-                run
-                        .getGameDirectory()
-                        .set(project.getLayout().getProjectDirectory().dir("build").dir("tmp").dir("gametestRuns"));
-                run.getSourceSet().set(testSourceSet);
-                run.systemProperty("neoforge.gameTestServer", "true");
-                run.systemProperty("neoforge.enabledGameTestNamespaces", TESTMOD_ID);
-                run.systemProperty(modId + ".example_scripts", exampleScripts);
-            });
-            runs.create(TESTMOD_ID, (run) -> {
-                run.client();
-                run.getSourceSet().set(testSourceSet);
-                run.systemProperty("neoforge.gameTestServer", "true");
-                run.systemProperty("neoforge.enabledGameTestNamespaces", TESTMOD_ID);
-                run.systemProperty(modId + ".example_scripts", exampleScripts);
-            });
-        });
     }
 
     public String getProperty(String propertyName) {

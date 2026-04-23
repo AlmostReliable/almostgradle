@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 
 ## Unreleased
 
+- added support for NeoForge test framework
+- added support for JUnit tests
+- changed test mod definition to decouple it from vanilla game tests
 - updated internal ModDevGradle version to 2.0.138
 - updated minimum ModDevGradle version to 2.0.138 for compatibility with unobfuscated sources
 - updated default Java target version to Java 25

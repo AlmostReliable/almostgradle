@@ -1,6 +1,7 @@
 package com.almostreliable.almostgradle.dependency;
 
 import com.almostreliable.almostgradle.AlmostGradleExtension;
+import com.almostreliable.almostgradle.TestSettings;
 import com.almostreliable.almostgradle.Utils;
 import net.neoforged.moddevgradle.dsl.ModModel;
 import net.neoforged.moddevgradle.dsl.NeoForgeExtension;
@@ -109,8 +110,8 @@ public abstract class RecipeViewers {
             Set<ModModel> loadedMods = new HashSet<>();
             loadedMods.add(mainMod);
 
-            if (almostGradle.getTestMod().get() && settings.getTestMod().get()) {
-                var testMod = neoForge.getMods().maybeCreate(AlmostGradleExtension.TESTMOD_ID);
+            if (almostGradle.getTestSettings().getTestMod().get() && settings.getTestMod().get()) {
+                var testMod = neoForge.getMods().maybeCreate(TestSettings.TESTMOD_ID);
                 var testSourceSet = java.getSourceSets().getByName("test");
 
                 compileClasspath = compileClasspath.plus(testSourceSet.getCompileClasspath());
