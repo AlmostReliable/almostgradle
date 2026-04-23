@@ -71,6 +71,37 @@ After specifying the required entries and calling the `setup` method, Almost Gra
 
 The behavior of this process and additional features can be modified by the following configuration options.
 
+## Mod Package
+
+This feature sets the root package for the project. This is consumed by other features that rely on the package
+structure. You only need to define this if you make use of one of the features that need this information and if the
+default package is not correct.
+
+Features that currently need this:
+- [Build Config](#build-config)
+
+### Defaults:
+
+`group` and `modId` refer to the properties you set in your `gradle.properties` file.
+
+Mod Package: `group.modId`, e.g. `com.almostreliable.almostunified`
+
+### Configuration:
+
+The package can be modified in the `setup` block.
+
+```kts
+almostgradle.setup {
+    modPackage = "com.almostreliable.almostunified"
+}
+```
+
+Alternatively, it can be changed via property in the `gradle.properties` file.
+
+```properties
+modPackage = com.almostreliable.almostunified
+```
+
 ## Java Version
 
 This feature sets the Java version for the project.
@@ -152,8 +183,7 @@ almostgradle.setup {
 This feature generates a class with mod constants. To achieve this, Almost Gradle internally uses the [Build Config]
 plugin. When the `build` task is invoked, the [Build Config] class will be generated.
 
-It is highly recommended to change the `package` property to your actual package name if your package structure does not
-use your `modId` as the root package. This allows using the generated build config class without any imports.
+If the file generates in the wrong package, you can change the [Mod Package](#mod-package) option to adjust it.
 
 ### Defaults:
 
@@ -163,20 +193,21 @@ Name: `BuildConfig`
 
 ### Configuration:
 
-This feature can be disabled in the `setup` block.
+This feature can be disabled in the `setup` block. You can also provide a string to modify the name of the file.
 
 ```kts
 almostgradle.setup {
     buildConfig = false
+    buildConfig = ModConstants
 }
 ```
 
-When enabled, it's possible to define a custom package and class name inside the `gradle.properties` file.
+Alternatively, it can be defined via property in the `gradle.properties` file.
 
-```properties
-almostgradle.buildconfig.package = some.example.package.path
-almostgradle.buildconfig.name = ModConstants
-```
+````properties
+almostgradle.buildconfig = false
+almostgradle.buildconfig = ModConstants
+````
 
 ## Launch Arguments
 
@@ -204,9 +235,9 @@ almostgradle.setup {
 
 Alternatively, it can be enabled via property in the `gradle.properties` file.
 
-````properties
+```properties
 almostgradle.launchArgs.resizeClient = true
-````
+```
 
 ### Auto World Join
 
@@ -242,10 +273,10 @@ almostgradle.setup {
 
 Alternatively, it can be enabled via property in the `gradle.properties` file.
 
-````properties
+```properties
 almostgradle.launchArgs.autoWorldJoin = true
 almostgradle.launchArgs.autoWorldJoin = My World
-````
+```
 
 ### Log Level
 
@@ -269,9 +300,9 @@ almostgradle.setup {
 
 Alternatively, it can be modified via property in the `gradle.properties` file.
 
-````properties
+```properties
 almostgradle.launchArgs.loggingLevel = INFO
-````
+```
 
 ### Mixin Debug Output
 
@@ -295,9 +326,9 @@ almostgradle.setup {
 
 Alternatively, it can be enabled via property in the `gradle.properties` file.
 
-````properties
+```properties
 almostgradle.launchArgs.mixinDebugOutput = true
-````
+```
 
 ## Data Generation
 

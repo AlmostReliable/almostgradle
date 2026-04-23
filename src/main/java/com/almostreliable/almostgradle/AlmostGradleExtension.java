@@ -39,6 +39,7 @@ public abstract class AlmostGradleExtension {
         this.testSettings = project.getObjects().newInstance(TestSettings.class);
         var providers = project.getProviders();
 
+        getModPackage().convention(project.getGroup() + "." + getModId());
         getJavaVersion().convention(DEFAULT_JAVA_VERSION);
         getApiSourceSet().convention(false);
         getMavenPublish().convention(false);
@@ -50,9 +51,15 @@ public abstract class AlmostGradleExtension {
 
         getWithSourcesJar().convention(true);
         getWithAccessTransformerValidation().convention(true);
-        getBuildConfig().convention(true);
+        getBuildConfig().set(providers.gradleProperty(NAME + ".buildconfig").map(s -> {
+            if (s.equals("true")) return true;
+            if (s.equals("false")) return false;
+            return s;
+        }).orElse(true));
         getProcessResources().set(true);
     }
+
+    public abstract Property<String> getModPackage();
 
     public abstract Property<Integer> getJavaVersion();
 
@@ -62,7 +69,7 @@ public abstract class AlmostGradleExtension {
 
     public abstract Property<Boolean> getWithAccessTransformerValidation();
 
-    public abstract Property<Boolean> getBuildConfig();
+    public abstract Property<Object> getBuildConfig();
 
     public abstract Property<Object> getDataGen();
 
@@ -109,6 +116,13 @@ public abstract class AlmostGradleExtension {
 
     public String getModVersion() {
         return this.getProperty("modVersion");
+    }
+
+    public String getPackage() {
+        if (project.findProperty("modPackage") != null) {
+            return getProperty("modPackage");
+        }
+        return getModPackage().get();
     }
 
     public String getMinecraftVersion() {
@@ -297,8 +311,16 @@ public abstract class AlmostGradleExtension {
     }
 
     private void applyBuildConfig() {
-        if (!getBuildConfig().get()) {
-            return;
+        Object o = getBuildConfig().get();
+
+        String fileName;
+        if (o instanceof Boolean b) {
+            if (!b) return;
+            fileName = "BuildConfig";
+        } else if (o instanceof String s) {
+            fileName = s;
+        } else {
+            throw new GradleException("Invalid value for BuildConfig property: " + o);
         }
 
         try {
@@ -309,24 +331,15 @@ public abstract class AlmostGradleExtension {
 
             var buildConfig = project.getExtensions().getByType(BuildConfigExtension.class);
             buildConfig.useJavaOutput();
-            buildConfig.buildConfigField("String", "MOD_ID", "\"" + this.getModId() + "\"");
-            buildConfig.buildConfigField("String", "MOD_NAME", "\"" + this.getModName() + "\"");
+            buildConfig.buildConfigField("String", "MOD_ID", "\"" + getModId() + "\"");
+            buildConfig.buildConfigField("String", "MOD_NAME", "\"" + getModName() + "\"");
             buildConfig.buildConfigField("String", "MOD_VERSION", "\"" + project.getVersion() + "\"");
 
-            Object packageName = project.findProperty(NAME + ".buildconfig.package");
-            if (packageName == null) {
-                packageName = project.getGroup() + "." + getModId();
-            }
+            buildConfig.className(fileName);
+            var modPackage = getPackage();
+            buildConfig.packageName(modPackage);
 
-            buildConfig.packageName(packageName.toString());
-
-            Object className = project.findProperty(NAME + ".buildconfig.name");
-            if (className != null) {
-                buildConfig.className(className.toString());
-            }
-
-            log("📕Applied buildconfig output under: " + packageName +
-                (className == null ? ".BuildConfig" : "." + className));
+            log("📕Applied buildconfig output under: " + modPackage + "." + fileName);
         } catch (Exception e) {
             project.getLogger().error("... Failed to apply buildconfig", e);
         }
