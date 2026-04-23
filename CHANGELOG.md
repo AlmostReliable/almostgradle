@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog], and this project adheres to [Semantic Versioning].
 
 ## Unreleased
+- /
+
+## [2.0.0] - 2026-04-23
 
 **Note**: This release is a new major version and includes breaking changes.
 
@@ -99,3 +102,4 @@ Initial release.
 [1.5.0]: https://github.com/AlmostReliable/almostgradle/releases/tag/v1.5.0
 [1.5.1]: https://github.com/AlmostReliable/almostgradle/releases/tag/v1.5.1
 [1.5.2]: https://github.com/AlmostReliable/almostgradle/releases/tag/v1.5.2
+[2.0.0]: https://github.com/AlmostReliable/almostgradle/releases/tag/v2.0.0
