@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 - updated minimum ModDevGradle version to 2.0.138 for compatibility with unobfuscated sources
 - updated default Java target version to Java 25
 - fixed wrong Roughly Enough Items recipe viewer mod id
+- fixed datagen properties not working
 
 ## [1.5.2] - 2026-03-24
 

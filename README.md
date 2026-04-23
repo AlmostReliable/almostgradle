@@ -360,6 +360,13 @@ almostgradle.setup {
 }
 ```
 
+Alternatively, it can be enabled via property in the `gradle.properties` file.
+
+```properties
+almostgradle.datagen = true
+almostgradle.datagen = src/main/resources/generated
+```
+
 ## Tests
 
 This feature allows configuration of different test methods. Whether it's to add additional content in a separate test

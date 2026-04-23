@@ -43,7 +43,7 @@ public abstract class AlmostGradleExtension {
         getJavaVersion().convention(DEFAULT_JAVA_VERSION);
         getApiSourceSet().convention(false);
         getMavenPublish().convention(false);
-        getDataGen().set(providers.gradleProperty("datagen").map(s -> {
+        getDataGen().set(providers.gradleProperty(NAME + ".datagen").map(s -> {
             if (s.equals("true")) return true;
             if (s.equals("false")) return false;
             return s;
