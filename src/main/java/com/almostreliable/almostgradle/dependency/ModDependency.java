@@ -48,7 +48,7 @@ public interface ModDependency {
     class Rei implements ModDependency {
         @Override
         public String id() {
-            return "rei";
+            return "roughlyenoughitems";
         }
 
         @Override
