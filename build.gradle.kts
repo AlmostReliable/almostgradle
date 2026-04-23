@@ -6,7 +6,6 @@ plugins {
 }
 
 val minimumGradleVersion: String by project
-val minimumMdgVersion: String by project
 
 repositories {
     gradlePluginPortal()
@@ -38,7 +37,7 @@ tasks {
 buildConfig {
     buildConfigField("String", "VERSION", "\"${project.version}\"")
     buildConfigField("String", "MINIMUM_GRADLE_VERSION", "\"$minimumGradleVersion\"")
-    buildConfigField("String", "MINIMUM_MDG_VERSION", "\"$minimumMdgVersion\"")
+    buildConfigField("String", "MINIMUM_MDG_VERSION", "\"${libs.versions.moddevgradle}\"")
 }
 
 gradlePlugin {

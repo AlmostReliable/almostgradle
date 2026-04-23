@@ -5,7 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog], and this project adheres to [Semantic Versioning].
 
 ## Unreleased
-- /
+
+- updated internal ModDevGradle version to 2.0.138
+- updated minimum ModDevGradle version to 2.0.138 for compatibility with unobfuscated sources
 
 ## [1.5.2] - 2026-03-24
 
