@@ -37,7 +37,7 @@ tasks {
 buildConfig {
     buildConfigField("String", "VERSION", "\"${project.version}\"")
     buildConfigField("String", "MINIMUM_GRADLE_VERSION", "\"$minimumGradleVersion\"")
-    buildConfigField("String", "MINIMUM_MDG_VERSION", "\"${libs.versions.moddevgradle}\"")
+    buildConfigField("String", "MINIMUM_MDG_VERSION", "\"${libs.versions.moddevgradle.get()}\"")
 }
 
 gradlePlugin {
