@@ -332,7 +332,9 @@ almostgradle.setup {
 ## Test Mod
 
 This feature creates a test mod with its own run configuration. It will use the default `test` source set. An additional
-run configuration is created for running game tests.
+run configuration is created for running game tests. The game directory is set to a temporary folder inside the build
+directory to avoid crashes with file-based runtime mods. If you rely on runtime mods in the game tests, they have to be
+loaded via Gradle.
 
 The test mod requires a main mod class and its own `neoforge.mods.toml` file. It should look like this:
 
