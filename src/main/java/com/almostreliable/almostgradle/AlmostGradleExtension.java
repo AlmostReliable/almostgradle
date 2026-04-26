@@ -183,11 +183,11 @@ public abstract class AlmostGradleExtension {
             neoForge.getValidateAccessTransformers().set(true);
         }
 
-        neoForge.getRuns().create("client", (run) -> {
+        neoForge.getRuns().create("client", run -> {
             run.client();
             run.getLoadedMods().set(Set.of(mainMod));
         });
-        neoForge.getRuns().create("server", (run) -> {
+        neoForge.getRuns().create("server", run -> {
             run.server();
             run.getLoadedMods().set(Set.of(mainMod));
         });
@@ -212,21 +212,35 @@ public abstract class AlmostGradleExtension {
             sourceSet.srcDir(generatedPath);
             sourceSet.exclude("**/.cache/**");
         });
-        neoForge.getRuns().create("datagen", (run) -> {
-            run.data();
-            run
-                    .getGameDirectory()
-                    .set(project.getLayout().getBuildDirectory().dir("tmp").get().dir("datagenRuns"));
+        neoForge.getRuns().create("datagen_client", run -> {
+            run.clientData();
+            run.getGameDirectory().set(project.getLayout().getBuildDirectory().dir("tmp").get().dir("datagenRuns"));
             run.getLoadedMods().set(Set.of(mainMod));
-            run
-                    .getProgramArguments()
-                    .addAll("--mod",
-                            getModId(),
-                            "--all",
-                            "--output",
-                            project.file(generatedPath).getAbsolutePath(),
-                            "--existing",
-                            project.file("src/main/resources").getAbsolutePath());
+            run.getIdeName().set("DataGen (Client)");
+            run.getProgramArguments().addAll(
+                    "--mod",
+                    getModId(),
+                    "--all",
+                    "--output",
+                    project.file(generatedPath).getAbsolutePath(),
+                    "--existing",
+                    project.file("src/main/resources").getAbsolutePath()
+            );
+        });
+        neoForge.getRuns().create("datagen_server", run -> {
+            run.serverData();
+            run.getGameDirectory().set(project.getLayout().getBuildDirectory().dir("tmp").get().dir("datagenRuns"));
+            run.getLoadedMods().set(Set.of(mainMod));
+            run.getIdeName().set("DataGen (Server)");
+            run.getProgramArguments().addAll(
+                    "--mod",
+                    getModId(),
+                    "--all",
+                    "--output",
+                    project.file(generatedPath).getAbsolutePath(),
+                    "--existing",
+                    project.file("src/main/resources").getAbsolutePath()
+            );
         });
 
         log("📕Applied datagen output under: " + generatedPath.replace('/', '.'));

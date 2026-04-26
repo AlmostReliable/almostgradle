@@ -377,9 +377,12 @@ almostgradle.launchArgs.mixinDebugOutput = true
 
 ## Data Generation
 
-This feature generates a run configuration for data generation. The game directory is set to a temporary folder inside
+This feature generates run configurations for data generation. The game directory is set to a temporary folder inside
 the build directory to avoid crashes with file-based runtime mods. If you rely on runtime mods in the data generation,
 they have to be loaded via Gradle.
+
+Since Minecraft 26.1, data generation has been split between client and server. Almost Gradle will create two different
+configurations for each type. They will both use the same temporary folder.
 
 ### Defaults:
 
