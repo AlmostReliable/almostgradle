@@ -42,6 +42,7 @@ public abstract class AlmostGradleExtension {
         getModPackage().convention(project.getGroup() + "." + getModId());
         getJavaVersion().convention(DEFAULT_JAVA_VERSION);
         getMavenPublish().convention(false);
+        getSplitRunDirs().convention(true);
         getDataGen().set(providers.gradleProperty(NAME + ".datagen").map(s -> {
             if (s.equals("true")) return true;
             if (s.equals("false")) return false;
@@ -76,6 +77,8 @@ public abstract class AlmostGradleExtension {
     public abstract Property<Object> getDataGen();
 
     public abstract Property<Boolean> getMavenPublish();
+
+    public abstract Property<Boolean> getSplitRunDirs();
 
     public RecipeViewers getRecipeViewers() {
         return recipeViewers;
@@ -166,6 +169,12 @@ public abstract class AlmostGradleExtension {
         var neoForge = project.getExtensions().getByType(NeoForgeExtension.class);
         neoForge.getRuns().forEach(run -> {
             launchArgs.applyRunArguments(run);
+
+            var folderName = run.getIdeFolderName().get();
+            if (getSplitRunDirs().get() && !folderName.contains("tmp")) {
+                var dir = run.getGameDirectory().get().dir(run.getName());
+                run.getGameDirectory().set(dir);
+            }
             log("\t* " + run.getIdeName().get());
         });
     }

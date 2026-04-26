@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 
 ## Unreleased
 
+- added option to split run configuration directories
 - fixed data generation feature not working with Minecraft 26.1+ because of client and server separation
 - fixed inconsistent internal names for recipe viewer run configurations
 - change build directory resolving to use built-in Gradle method

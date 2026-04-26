@@ -165,7 +165,7 @@ almostgradle.setup {
 
 ## Maven Publish
 
-This features enables Maven publishing of the project's artifacts. By default, this only publishes to Maven local.
+This feature enables Maven publishing of the project's artifacts. By default, this only publishes to Maven local.
 
 Artifacts include the built JAR, the source JAR if [source JAR](#sources-jar) is enabled, and the API JAR if
 [API JAR](#api-jar) is enabled.
@@ -181,6 +181,29 @@ This feature can be enabled in the `setup` block.
 ```kts
 almostgradle.setup {
     mavenPublish = true
+}
+```
+
+## Split Run Directories
+
+This feature enables splitting the run directories for each run configuration. By default, all run configs use the
+`run` directory in the project root. When this option is enabled, each run configuration will use a dedicated
+subfolder inside the `run` directory.
+
+Special configurations like data generation and game tests will be excluded from this behavior since they use a
+temporary directory.
+
+### Defaults:
+
+Enabled: `true`
+
+### Configuration:
+
+This feature can be disabled in the `setup` block.
+
+```kts
+almostgradle.setup {
+    splitRunDirs = false
 }
 ```
 
