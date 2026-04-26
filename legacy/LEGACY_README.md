@@ -1,23 +1,7 @@
-<h1 align="center">
-    <p>Almost Gradle</p>
-</h1>
+# Information
 
-<div align="center">
-
-A utility [Gradle] plugin for setting up [NeoForge] mods with [ModDevGradle].
-
-[![Workflow Status][workflow_status_badge]][workflow_status_link]
-![License][license_badge]
-[![Version][version_badge]][version_link]
-[![Discord][discord_badge]][discord]
-
-</div>
-
-# Version Information
-
-Almost Gradle introduced breaking changes in version 2.0.0. The new version is mainly targeting Minecraft 26.1
-and above. Due to breaking changes, the following README might not be applicable to older versions. If you use
-an older version, please refer to the [legacy README](legacy/LEGACY_README.md).
+This README is for the legacy version of Almost Gradle prior to version 2.0.0, which introduced breaking changes.
+If you use a newer version, please refer to the main [README](../README.md) of this repository.
 
 # Applying the Plugin
 
@@ -29,8 +13,8 @@ automatically apply the [ModDevGradle] plugin, allowing to choose its version ma
 
 ```kts
 plugins {
-    id("net.neoforged.moddev") version "2.0.138"
-    id("com.almostreliable.almostgradle") version "2.0.0"
+    id("net.neoforged.moddev") version "2.0.+"
+    id("com.almostreliable.almostgradle") version "1.0.+"
 }
 ```
 
@@ -62,7 +46,7 @@ After specifying the required entries and calling the `setup` method, Almost Gra
     - set the project group
     - set the project version as `minecraftVersion-modVersion`
     - set the base archive name to `modId-neoforge`
-    - [set the Java version to `25`](#java-version)
+    - [set the Java version to `21`](#java-version)
     - [enable generation of a source JAR](#sources-jar)
 - [process resources](#process-resources)
     - collect all placeholder properties from resource files
@@ -81,45 +65,13 @@ The behavior of this process and additional features can be modified by the foll
 This plugin is a utility wrapper for [ModDevGradle]. It does *not* replace the functionality of it. If you want to add
 or modify functionality not covered by Almost Gradle, you can still use the MDG plugin directly.
 
-## Mod Package
-
-This feature sets the root package for the project. This is consumed by other features that rely on the package
-structure. You only need to define this if you make use of one of the features that need this information and if the
-default package is not correct.
-
-Features that currently need this:
-- [API JAR](#api-jar)
-- [Build Config](#build-config)
-
-### Defaults:
-
-`group` and `modId` refer to the properties you set in your `gradle.properties` file.
-
-Mod Package: `group.modId`, e.g. `com.almostreliable.almostunified`
-
-### Configuration:
-
-The package can be modified in the `setup` block.
-
-```kts
-almostgradle.setup {
-    modPackage = "com.almostreliable.almostunified"
-}
-```
-
-Alternatively, it can be changed via property in the `gradle.properties` file.
-
-```properties
-modPackage = com.almostreliable.almostunified
-```
-
 ## Java Version
 
 This feature sets the Java version for the project.
 
 ### Defaults:
 
-Java Version: `25`
+Java Version: `21`
 
 ### Configuration:
 
@@ -127,30 +79,7 @@ The target version can be modified in the `setup` block.
 
 ```kts
 almostgradle.setup {
-    javaVersion = 21
-}
-```
-
-## API Jar
-
-This feature enables the generation of an API JAR for the mod. The artifact is generated when the `build` task is
-invoked.
-
-It's assumed that you have an `api` package in your root package. All classes from there are bundled in the API JAR.
-If the package is incorrect, you can use the [Mod Package](#mod-package) option to change it.
-
-### Defaults:
-
-Enabled: `false`
-Mod Package: `group.modId`, e.g. `com.almostreliable.almostunified`
-
-### Configuration:
-
-This feature can be enabled in the `setup` block.
-
-```kts
-almostgradle.setup {
-    withApiJar = true
+    javaVersion = 17
 }
 ```
 
@@ -177,8 +106,7 @@ almostgradle.setup {
 
 This feature enables Maven publishing of the project's artifacts. By default, this only publishes to Maven local.
 
-Artifacts include the built JAR, the source JAR if [source JAR](#sources-jar) is enabled, and the API JAR if
-[API JAR](#api-jar) is enabled.
+Artifacts include the built JAR and the source JAR if [source JAR](#sources-jar) is enabled.
 
 ### Defaults:
 
@@ -261,30 +189,27 @@ almostgradle.setup {
 This feature generates a class with mod constants. To achieve this, Almost Gradle internally uses the [Build Config]
 plugin. When the `build` task is invoked, the [Build Config] class will be generated.
 
-If the file generates in the wrong package, you can change the [Mod Package](#mod-package) option to adjust it.
-
 ### Defaults:
 
 Enabled: `true`<br>
-Mod Package: `group.modId`, e.g. `com.almostreliable.almostunified`<br>
+Package: `group.modId`<br>
 Name: `BuildConfig`
 
 ### Configuration:
 
-This feature can be disabled in the `setup` block. You can also provide a string to modify the name of the file.
+This feature can be disabled in the `setup` block.
 
 ```kts
 almostgradle.setup {
     buildConfig = false
-    buildConfig = ModConstants
 }
 ```
 
-Alternatively, it can be defined via property in the `gradle.properties` file.
+When enabled, it's possible to define a custom package and class name inside the `gradle.properties` file.
 
 ```properties
-almostgradle.buildconfig = false
-almostgradle.buildconfig = ModConstants
+almostgradle.buildconfig.package = some.example.package.path
+almostgradle.buildconfig.name = ModConstants
 ```
 
 ## Launch Arguments
@@ -410,12 +335,9 @@ almostgradle.launchArgs.mixinDebugOutput = true
 
 ## Data Generation
 
-This feature generates run configurations for data generation. The game directory is set to a temporary folder inside
+This feature generates a run configuration for data generation. The game directory is set to a temporary folder inside
 the build directory to avoid crashes with file-based runtime mods. If you rely on runtime mods in the data generation,
 they have to be loaded via Gradle.
-
-Since Minecraft 26.1, data generation has been split between client and server. Almost Gradle will create two different
-configurations for each type.
 
 ### Defaults:
 
@@ -441,43 +363,12 @@ almostgradle.setup {
 }
 ```
 
-Alternatively, it can be enabled via property in the `gradle.properties` file.
+## Test Mod
 
-```properties
-almostgradle.datagen = true
-almostgradle.datagen = src/main/resources/generated
-```
+This feature creates a test mod with its own run configuration. It will use the default `test` source set. An additional
+run configuration is created for running game tests.
 
-## Tests
-
-This feature allows configuration of different test methods. Whether it's to add additional content in a separate test
-mod for local testing, or full automation using game or unit tests.
-
-Any of the testing methods can be enabled by specifying it in the `tests` block.
-
-```kts
-almostgradle.setup {
-    tests {
-        // configuration
-    }
-}
-```
-
-### Test Mod
-
-Defines if a test mod and a custom run configuration should be created. This allows to have a separate mod that lives
-in your `test` source set and won't ship to production, which is useful if you want to add additional content that is
-only useful for testing.
-
-The run configuration called `Testmod`will have the main and the test mod loaded. If [game tests](#game-tests) are
-enabled, this run configuration will also have in-game commands that allow you to run game tests manually. The game
-directory for the configuration is set to a temporary folder inside the build directory to avoid crashes with file-based
-runtime mods. If you rely on runtime mods in the test mod, they have to be loaded via Gradle.
-
-#### Requirements
-
-The test mod requires a main mod class annotated with `@Mod` and its own `neoforge.mods.toml` file. It should look
-similar to this:
+The test mod requires a main mod class and its own `neoforge.mods.toml` file. It should look like this:
 
 ```toml
 modLoader = "javafml"
@@ -489,108 +380,17 @@ version = "0.0.0"
 displayName = "Test Mod"
 ```
 
-A test mod can also include own mixins.
-
-#### Defaults:
+### Defaults:
 
 Enabled: `false`
 
-#### Configuration:
+### Configuration:
 
 This feature can be enabled in the `setup` block.
 
 ```kts
 almostgradle.setup {
-    tests {
-        testMod = true
-    }
-}
-```
-
-### Game Tests
-
-Defines if the vanilla game test framework should be enabled. Game tests allow you to automate specific scenarios in
-the in-game level and validate behavior. This requires the [Test Mod](#test-mod) to be enabled.
-
-When activated, a new run configuration called `Gametest` will be created. This configuration will start the game test
-server and invoke all game tests annotated with `@GameTest` within the test mod. The game directory for the
-configuration is set to a temporary folder inside the build directory to avoid crashes with file-based runtime mods.
-If you rely on runtime mods in the game tests, they have to be loaded via Gradle.
-
-When this option is enabled, the [Test Mod](#test-mod) run configuration will have in-game commands to start game tests
-manually.
-
-#### Defaults:
-
-Enabled: `false`
-
-#### Configuration:
-
-This feature can be enabled in the `setup` block.
-
-```kts
-almostgradle.setup {
-    tests {
-        gameTests = true
-    }
-}
-```
-
-### Test Framework
-
-Defines if the NeoForge test framework should be loaded into the project. It serves as a great addition to vanilla
-[game tests](#game-tests), but also works on its own. NeoForge uses it to test custom events. It also has useful
-utilities like the `@EmptyTemplate` annotation.
-
-When activated, the dependency will be loaded into the `test` source set.
-
-You can read more about the NeoForge test framework [here](https://github.com/neoforged/NeoForge/blob/26.1.x/docs/TESTFRAMEWORK.md).
-
-#### Defaults:
-
-Enabled: `false`
-
-#### Configuration:
-
-This feature can be enabled in the `setup` block.
-
-```kts
-almostgradle.setup {
-    tests {
-        testFramework = true
-    }
-}
-```
-
-### JUnit
-
-Defines if [JUnit](https://junit.org/) should be loaded into the project and be configured automatically. It's a very
-popular unit testing library for Java. You can write very fast and simple tests that don't require game context.
-
-When activated, the required dependencies will be loaded into the `test` source set. Additionally, the `test` Gradle
-task is altered to use the JUnit platform. That means unit tests are automatically invoked when you use the `build`
-Gradle task.
-
-If the NeoForge [test framework](#test-framework) is enabled, the functionality of unit tests is extended to use an
-ephemeral Minecraft server that loads basic data you can use for testing. This is slimmer than a whole game test, but
-you can't perform in-world tests.
-
-If no [test mod](#test-mod) is enabled, the target mod will be the main mod, but the tests still have to be placed into
-the `test` source set.
-
-#### Defaults:
-
-Enabled: `false`
-
-#### Configuration:
-
-This feature can be enabled in the `setup` block.
-
-```kts
-almostgradle.setup {
-    tests {
-        jUnit = true
-    }
+    testMod = true
 }
 ```
 
@@ -609,7 +409,7 @@ Possible values are:
 - `none` - don't load anything into the compile time classpath
 
 *Run Config* refers to whether a run configuration should be created for the recipe viewer. If *Run Config* is enabled,
-the option *Test Mod* defines whether the [test mod](#test-mod) should be loaded in that run configuration.
+the option *Test Mod* defines whether the test mod should be loaded in that run configuration.
 
 ### Defaults:
 
@@ -724,19 +524,8 @@ Almost Gradle offers additional configurations.
 Almost Gradle also allows applying dependencies to the test classpath only. To do that, the configuration has to be
 prefixed with `test`.
 
-<!-- Badges -->
-[workflow_status_badge]: https://img.shields.io/github/actions/workflow/status/AlmostReliable/almostgradle/build.yml?branch=main&style=for-the-badge
-[workflow_status_link]: https://github.com/AlmostReliable/almostgradle/actions
-[license_badge]: https://img.shields.io/badge/License-ARR-ffa200?style=for-the-badge
-[version_badge]: https://img.shields.io/github/v/release/AlmostReliable/almostgradle?include_prereleases&style=for-the-badge
-[version_link]: https://github.com/AlmostReliable/almostgradle/releases/latest
-[discord_badge]: https://img.shields.io/discord/917251858974789693?color=5865f2&label=Discord&logo=discord&style=for-the-badge
-
 <!-- Links -->
-[gradle]: https://gradle.org/
-[neoforge]: https://neoforged.net/
 [moddevgradle]: https://github.com/neoforged/ModDevGradle
-[discord]: https://discord.com/invite/ThFnwZCyYY
 [gradle plugin portal]: https://plugins.gradle.org/plugin/com.almostreliable.almostgradle
 [java plugin]: https://docs.gradle.org/current/userguide/java_plugin.html
 [build config]: https://github.com/gmazzo/gradle-buildconfig-plugin
