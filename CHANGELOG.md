@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog], and this project adheres to [Semantic Versioning].
 
 ## Unreleased
+- /
+
+## [2.1.0] - 2026-04-26
 
 - added option to split run configuration directories
 - fixed data generation feature not working with Minecraft 26.1+ because of client and server separation
@@ -107,3 +110,4 @@ Initial release.
 [1.5.1]: https://github.com/AlmostReliable/almostgradle/releases/tag/v1.5.1
 [1.5.2]: https://github.com/AlmostReliable/almostgradle/releases/tag/v1.5.2
 [2.0.0]: https://github.com/AlmostReliable/almostgradle/releases/tag/v2.0.0
+[2.1.0]: https://github.com/AlmostReliable/almostgradle/releases/tag/v2.1.0
