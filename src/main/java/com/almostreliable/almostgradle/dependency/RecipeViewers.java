@@ -100,7 +100,7 @@ public abstract class RecipeViewers {
         var apiDeps = settings.getApiDependencies();
 
         if (settings.getRunConfig().isPresent() && settings.getRunConfig().get()) {
-            var sourceSet = java.getSourceSets().create(mod.id() + "Run");
+            var sourceSet = java.getSourceSets().create("client_" + mod.id());
 
             var compileClasspath = sourceSet.getCompileClasspath()
                     .plus(mainSourceSet.getCompileClasspath());
@@ -122,8 +122,8 @@ public abstract class RecipeViewers {
             sourceSet.setCompileClasspath(compileClasspath);
             sourceSet.setRuntimeClasspath(runtimeClasspath);
 
-            neoForge.getRuns().create(sourceSet.getName(), (run) -> {
-                run.getIdeName().set("RecipeViewer (" + mod.id().toUpperCase() + ")");
+            neoForge.getRuns().create(sourceSet.getName(), run -> {
+                run.getIdeName().set("Client (" + mod.id().toUpperCase() + ")");
                 run.client();
                 run.getSourceSet().set(sourceSet);
                 run.getLoadedMods().set(loadedMods);
