@@ -24,7 +24,7 @@ automatically apply the [ModDevGradle] plugin, allowing to choose its version ma
 ```kts
 plugins {
     id("net.neoforged.moddev") version "2.0.138"
-    id("com.almostreliable.almostgradle") version "1.5.2"
+    id("com.almostreliable.almostgradle") version "2.0.0"
 }
 ```
 
