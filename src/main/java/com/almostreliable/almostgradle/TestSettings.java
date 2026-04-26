@@ -100,7 +100,7 @@ public abstract class TestSettings {
                 runs.create("gametest", run -> {
                     run.server();
                     run.getGameDirectory()
-                            .set(project.getLayout().getProjectDirectory().dir("build").dir("tmp").dir("gametestRuns"));
+                            .set(project.getLayout().getBuildDirectory().get().dir("tmp").dir("gametestRuns"));
                     run.getSourceSet().set(testSourceSet);
                     run.systemProperty("neoforge.gameTestServer", "true");
                     run.systemProperty("neoforge.enabledGameTestNamespaces", TESTMOD_ID);

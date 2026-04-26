@@ -216,7 +216,7 @@ public abstract class AlmostGradleExtension {
             run.data();
             run
                     .getGameDirectory()
-                    .set(project.getLayout().getProjectDirectory().dir("build").dir("tmp").dir("datagenRuns"));
+                    .set(project.getLayout().getBuildDirectory().dir("tmp").get().dir("datagenRuns"));
             run.getLoadedMods().set(Set.of(mainMod));
             run
                     .getProgramArguments()
