@@ -56,7 +56,7 @@ After specifying the required entries and calling the `setup` method, Almost Gra
     - set the project group
     - set the project version as `minecraftVersion-modVersion`
     - set the base archive name to `modId-neoforge`
-    - [set the Java version to `21`]
+    - [set the Java version to `25`](#java-version)
     - [enable generation of a source JAR](#sources-jar)
 - [process resources](#process-resources)
     - collect all placeholder properties from resource files
@@ -382,7 +382,7 @@ the build directory to avoid crashes with file-based runtime mods. If you rely o
 they have to be loaded via Gradle.
 
 Since Minecraft 26.1, data generation has been split between client and server. Almost Gradle will create two different
-configurations for each type. They will both use the same temporary folder.
+configurations for each type.
 
 ### Defaults:
 
