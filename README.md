@@ -71,6 +71,10 @@ After specifying the required entries and calling the `setup` method, Almost Gra
 
 The behavior of this process and additional features can be modified by the following configuration options.
 
+**Important Information**<br>
+This plugin is a utility wrapper for [ModDevGradle]. It does *not* replace the functionality of it. If you want to add
+or modify functionality not covered by Almost Gradle, you can still use the MDG plugin directly.
+
 ## Mod Package
 
 This feature sets the root package for the project. This is consumed by other features that rely on the package
