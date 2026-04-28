@@ -5,7 +5,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog], and this project adheres to [Semantic Versioning].
 
 ## Unreleased
-- /
+
+- fixed recipe viewers using long internal name instead of short id (REI is now `rei` instead of `roughlyenoughitems`)
 
 ## [2.1.0] - 2026-04-26
 

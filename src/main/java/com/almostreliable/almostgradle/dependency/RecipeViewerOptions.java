@@ -9,6 +9,7 @@ import org.gradle.api.provider.Provider;
 import org.gradle.api.provider.ProviderFactory;
 
 import javax.inject.Inject;
+import java.util.Locale;
 
 @SuppressWarnings("UnstableApiUsage")
 public abstract class RecipeViewerOptions {
@@ -21,7 +22,7 @@ public abstract class RecipeViewerOptions {
         this.project = project;
         this.mod = mod;
         ProviderFactory providers = project.getProviders();
-        var propPrefix = AlmostGradleExtension.NAME + ".recipeViewers." + mod.id();
+        var propPrefix = AlmostGradleExtension.NAME + ".recipeViewers." + mod.shortId().toLowerCase(Locale.ROOT);
         getMavenRepository().convention(providers
                 .gradleProperty(propPrefix + ".maven")
                 .orElse(mod.defaultMavenRepo()));

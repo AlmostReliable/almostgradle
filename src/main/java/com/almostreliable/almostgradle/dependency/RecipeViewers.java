@@ -15,6 +15,7 @@ import org.gradle.api.tasks.Internal;
 
 import javax.inject.Inject;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 public abstract class RecipeViewers {
@@ -41,7 +42,6 @@ public abstract class RecipeViewers {
 
     public void emi(Action<? super RecipeViewerOptions> action) {
         action.execute(emi);
-        project.getLogger().lifecycle("EMI: " + emi.getVersion().get());
     }
 
     public RecipeViewerOptions getJei() {
@@ -73,7 +73,7 @@ public abstract class RecipeViewers {
         }
 
         var logger = project.getLogger();
-        logger.lifecycle("📕Start initializing RecipeViewer for " + mod.id().toUpperCase());
+        logger.lifecycle("📕Start initializing RecipeViewer " + mod.shortId());
 
         Utils.log(project, "\t* Version", settings.getVersion().get());
         Utils.log(project, "\t* Mode", settings.getMode().get().toString());
@@ -100,7 +100,7 @@ public abstract class RecipeViewers {
         var apiDeps = settings.getApiDependencies();
 
         if (settings.getRunConfig().isPresent() && settings.getRunConfig().get()) {
-            var sourceSet = java.getSourceSets().create("client_" + mod.id());
+            var sourceSet = java.getSourceSets().create("client_" + mod.shortId().toLowerCase(Locale.ROOT));
 
             var compileClasspath = sourceSet.getCompileClasspath()
                     .plus(mainSourceSet.getCompileClasspath());
@@ -123,7 +123,7 @@ public abstract class RecipeViewers {
             sourceSet.setRuntimeClasspath(runtimeClasspath);
 
             neoForge.getRuns().create(sourceSet.getName(), run -> {
-                run.getIdeName().set("Client (" + mod.id().toUpperCase() + ")");
+                run.getIdeName().set("Client (" + mod.shortId() + ")");
                 run.client();
                 run.getSourceSet().set(sourceSet);
                 run.getLoadedMods().set(loadedMods);
@@ -131,7 +131,7 @@ public abstract class RecipeViewers {
 
             var config = Utils.createLocalRuntime(project,
                     sourceSet.getRuntimeClasspathConfigurationName(),
-                    mod.id());
+                    mod.shortId().toLowerCase(Locale.ROOT));
             config.withDependencies(d -> d.addAllLater(deps));
         }
 

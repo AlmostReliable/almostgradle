@@ -11,7 +11,9 @@ public interface ModDependency {
     ModDependency REI = new Rei();
     ModDependency JEI = new Jei();
 
-    String id();
+    String modId();
+
+    String shortId();
 
     String defaultMavenRepo();
 
@@ -20,9 +22,15 @@ public interface ModDependency {
     Iterable<Dependency> createDependencies(String minecraftVersion, String depVersion, DependencyFactory factory);
 
     class Emi implements ModDependency {
+
         @Override
-        public String id() {
+        public String modId() {
             return "emi";
+        }
+
+        @Override
+        public String shortId() {
+            return "EMI";
         }
 
         @Override
@@ -46,9 +54,16 @@ public interface ModDependency {
     }
 
     class Rei implements ModDependency {
+
+
         @Override
-        public String id() {
+        public String modId() {
             return "roughlyenoughitems";
+        }
+
+        @Override
+        public String shortId() {
+            return "REI";
         }
 
         @Override
@@ -72,9 +87,15 @@ public interface ModDependency {
     }
 
     class Jei implements ModDependency {
+
         @Override
-        public String id() {
+        public String modId() {
             return "jei";
+        }
+
+        @Override
+        public String shortId() {
+            return "JEI";
         }
 
         @Override
