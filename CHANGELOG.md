@@ -5,7 +5,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog], and this project adheres to [Semantic Versioning].
 
 ## Unreleased
-- /
+
+- bumped minimum Gradle version to 9.4.1
 
 ## [2.1.1] - 2026-04-28
 
