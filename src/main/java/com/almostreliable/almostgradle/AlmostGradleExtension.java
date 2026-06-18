@@ -195,6 +195,7 @@ public abstract class AlmostGradleExtension {
         neoForge.getRuns().create("client", run -> {
             run.client();
             run.getLoadedMods().set(Set.of(mainMod));
+            run.systemProperty(TestSettings.GAME_TEST_PROPERTY, "false");
         });
         neoForge.getRuns().create("server", run -> {
             run.server();

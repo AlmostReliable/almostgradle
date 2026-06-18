@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 ## Unreleased
 
 - bumped minimum Gradle version to 9.4.1
+- fixed gametest run config not starting game tests
+- disabled game tests for client run configurations except for testmod
 
 ## [2.1.1] - 2026-04-28
 

@@ -127,6 +127,7 @@ public abstract class RecipeViewers {
                 run.client();
                 run.getSourceSet().set(sourceSet);
                 run.getLoadedMods().set(loadedMods);
+                run.systemProperty(TestSettings.GAME_TEST_PROPERTY, "false");
             });
 
             var config = Utils.createLocalRuntime(project,

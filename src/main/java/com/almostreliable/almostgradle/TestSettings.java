@@ -13,6 +13,7 @@ public abstract class TestSettings {
 
     public static final String TESTMOD_ID = "testmod";
     public static final String JUNIT_VERSION = "5.14.1";
+    public static final String GAME_TEST_PROPERTY = "neoforge.enableGameTest";
 
     private final Project project;
 
@@ -73,10 +74,8 @@ public abstract class TestSettings {
             runs.create(TESTMOD_ID, run -> {
                 run.client();
                 run.getSourceSet().set(testSourceSet);
-                if (gameTestsEnabled) {
-                    run.systemProperty("neoforge.gameTestServer", "true");
-                    run.systemProperty("neoforge.enabledGameTestNamespaces", TESTMOD_ID);
-                }
+                // for clients, game tests are enabled by default, so this needs to be stateful
+                run.systemProperty(GAME_TEST_PROPERTY, String.valueOf(gameTestsEnabled));
             });
         });
     }
@@ -98,12 +97,11 @@ public abstract class TestSettings {
 
         neoForge.runs(runs ->
                 runs.create("gametest", run -> {
-                    run.server();
+                    run.getType().set("gameTestServer");
                     run.getGameDirectory()
                             .set(project.getLayout().getBuildDirectory().get().dir("tmp").dir("gametestRuns"));
                     run.getSourceSet().set(testSourceSet);
-                    run.systemProperty("neoforge.gameTestServer", "true");
-                    run.systemProperty("neoforge.enabledGameTestNamespaces", TESTMOD_ID);
+                    run.systemProperty(GAME_TEST_PROPERTY, "true");
                 })
         );
     }
