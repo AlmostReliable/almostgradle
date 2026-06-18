@@ -101,7 +101,7 @@ public abstract class AlmostGradleExtension {
     }
 
     public void tests(Action<TestSettings> action) {
-        testSettings.getEnabled().set(true);
+        testSettings.enableTests();
         action.execute(testSettings);
     }
 

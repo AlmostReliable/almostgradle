@@ -16,18 +16,16 @@ public abstract class TestSettings {
     public static final String GAME_TEST_PROPERTY = "neoforge.enableGameTest";
 
     private final Project project;
+    private boolean testsEnabled;
 
     @Inject
     public TestSettings(Project project) {
         this.project = project;
-        getEnabled().convention(false);
         getTestMod().convention(false);
         getGameTests().convention(false);
         getTestFramework().convention(false);
         getJUnit().convention(false);
     }
-
-    public abstract Property<Boolean> getEnabled();
 
     public abstract Property<Boolean> getTestMod();
 
@@ -38,9 +36,7 @@ public abstract class TestSettings {
     public abstract Property<Boolean> getJUnit();
 
     public void apply() {
-        if (!getEnabled().get()) {
-            return;
-        }
+        if (!testsEnabled) return;
 
         var logger = project.getLogger();
         logger.lifecycle("📕Applying test configurations:");
@@ -159,5 +155,9 @@ public abstract class TestSettings {
             unitTest.enable();
             unitTest.getTestedMod().set(testedMod);
         });
+    }
+
+    void enableTests() {
+        testsEnabled = true;
     }
 }
