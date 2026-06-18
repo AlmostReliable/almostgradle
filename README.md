@@ -594,6 +594,31 @@ almostgradle.setup {
 }
 ```
 
+### Unit Tests in Game Tests
+
+This option defines if unit tests should be invoked when the game test run configuration is started. This allows you
+to run all tests in a combined configuration.
+
+It is not recommended to enable this, unless you know what you are doing. The `test` Gradle task is already part of the
+`check` Gradle task, thus it is automatically invoked when you build your project. A successful build guarantees that
+all unit tests pass.
+
+#### Defaults:
+
+Enabled: `false`
+
+#### Configuration:
+
+This feature can be enabled in the `setup` block.
+
+```kts
+almostgradle.setup {
+    tests {
+        runUnitTestsInGameTests = true
+    }
+}
+```
+
 ## Recipe Viewers
 
 This feature allows configuration of recipe viewers and how they should be loaded. Recipe viewers can be loaded in their

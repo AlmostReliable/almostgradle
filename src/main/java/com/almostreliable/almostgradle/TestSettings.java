@@ -25,6 +25,7 @@ public abstract class TestSettings {
         getGameTests().convention(false);
         getTestFramework().convention(false);
         getJUnit().convention(false);
+        getRunUnitTestsInGameTests().convention(false);
     }
 
     public abstract Property<Boolean> getTestMod();
@@ -34,6 +35,8 @@ public abstract class TestSettings {
     public abstract Property<Boolean> getTestFramework();
 
     public abstract Property<Boolean> getJUnit();
+
+    public abstract Property<Boolean> getRunUnitTestsInGameTests();
 
     public void apply() {
         if (!testsEnabled) return;
@@ -98,6 +101,11 @@ public abstract class TestSettings {
                             .set(project.getLayout().getBuildDirectory().get().dir("tmp").dir("gametestRuns"));
                     run.getSourceSet().set(testSourceSet);
                     run.systemProperty(GAME_TEST_PROPERTY, "true");
+
+                    if (getJUnit().get() && getRunUnitTestsInGameTests().get()) {
+                        run.programArgument("--tests");
+                        run.programArgument(TESTMOD_ID + ":*");
+                    }
                 })
         );
     }
