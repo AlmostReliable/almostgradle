@@ -9,6 +9,7 @@ import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.BasePluginExtension;
 import org.gradle.api.plugins.JavaPluginExtension;
+import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.maven.MavenPublication;
@@ -19,6 +20,7 @@ import org.gradle.language.jvm.tasks.ProcessResources;
 import org.gradle.plugins.ide.idea.model.IdeaModel;
 
 import javax.inject.Inject;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -62,6 +64,7 @@ public abstract class AlmostGradleExtension {
             return s;
         }).orElse(true));
         getProcessResources().set(true);
+        getProcessResourceTargets().convention(List.of());
     }
 
     public abstract Property<String> getModPackage();
@@ -69,6 +72,8 @@ public abstract class AlmostGradleExtension {
     public abstract Property<Integer> getJavaVersion();
 
     public abstract Property<Boolean> getProcessResources();
+
+    public abstract ListProperty<String> getProcessResourceTargets();
 
     public abstract Property<Boolean> getWithSourcesJar();
 
@@ -171,7 +176,7 @@ public abstract class AlmostGradleExtension {
             project
                     .getTasks()
                     .named("processResources", ProcessResources.class)
-                    .configure(new ProcessResourceHandler(project, getRecipeViewers()));
+                    .configure(new ProcessResourceHandler(project, getRecipeViewers(), getProcessResourceTargets().get()));
         }
     }
 

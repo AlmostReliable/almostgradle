@@ -3,6 +3,7 @@ package com.almostreliable.almostgradle;
 import com.almostreliable.almostgradle.dependency.RecipeViewerOptions;
 import com.almostreliable.almostgradle.dependency.RecipeViewers;
 import org.gradle.api.Action;
+import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.tasks.SourceSet;
@@ -27,14 +28,16 @@ public class ProcessResourceHandler implements Action<ProcessResources> {
             "reiVersion", RecipeViewers::getRei
     );
 
-    private final List<String> targets = List.of("META-INF/neoforge.mods.toml", "pack.mcmeta");
+    private static final List<String> DEFAULT_TARGETS = List.of("META-INF/neoforge.mods.toml", "pack.mcmeta");
 
     private final Project project;
     private final RecipeViewers recipeViewers;
+    private final List<String> targets;
 
-    public ProcessResourceHandler(Project project, RecipeViewers recipeViewers) {
+    public ProcessResourceHandler(Project project, RecipeViewers recipeViewers, Iterable<String> customTargets) {
         this.project = project;
         this.recipeViewers = recipeViewers;
+        this.targets = createTargets(customTargets);
     }
 
     @Override
@@ -97,6 +100,19 @@ public class ProcessResourceHandler implements Action<ProcessResources> {
                 .flatMap(dir -> targets.stream().map(target -> new File(dir, target)))
                 .filter(File::exists)
                 .toList();
+    }
+
+    private List<String> createTargets(Iterable<String> customTargets) {
+        Set<String> result = new LinkedHashSet<>(DEFAULT_TARGETS);
+        for (String target : customTargets) {
+            if (new File(target).isAbsolute()) {
+                throw new GradleException("Process resource target paths must be relative to the resources directory: " + target);
+            }
+
+            result.add(target);
+        }
+
+        return result.stream().toList();
     }
 
     private Optional<String> getPropertyValue(String key) {

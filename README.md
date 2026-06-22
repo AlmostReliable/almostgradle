@@ -292,11 +292,14 @@ Enabled: `true`
 
 ### Configuration:
 
-This feature can be disabled in the `setup` block.
+This feature can be disabled in the `setup` block. Custom resource files can be added to the placeholder expansion
+target list with `processResourceTargets`. Paths must be relative to the resources directory, e.g. relative to
+`src/main/resources` for the default main source set.
 
 ```kts
 almostgradle.setup {
     processResources = false
+    processResourceTargets.add("custom/file.json")
 }
 ```
 
