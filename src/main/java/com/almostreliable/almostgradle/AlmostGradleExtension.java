@@ -55,6 +55,7 @@ public abstract class AlmostGradleExtension {
         getWithSourcesJar().convention(true);
         getWithApiJar().convention(false);
         getWithAccessTransformerValidation().convention(true);
+        getAccessTransformerPublish().convention(false);
         getBuildConfig().set(providers.gradleProperty(NAME + ".buildconfig").map(s -> {
             if (s.equals("true")) return true;
             if (s.equals("false")) return false;
@@ -74,6 +75,8 @@ public abstract class AlmostGradleExtension {
     public abstract Property<Boolean> getWithApiJar();
 
     public abstract Property<Boolean> getWithAccessTransformerValidation();
+
+    public abstract Property<Boolean> getAccessTransformerPublish();
 
     public abstract Property<Object> getBuildConfig();
 
@@ -198,6 +201,9 @@ public abstract class AlmostGradleExtension {
 
         if (getWithAccessTransformerValidation().get()) {
             neoForge.getValidateAccessTransformers().set(true);
+        }
+        if (getAccessTransformerPublish().get()) {
+            neoForge.getAccessTransformers().publish(project.file("src/main/resources/META-INF/accesstransformer.cfg"));
         }
 
         neoForge.getRuns().create("client", run -> {

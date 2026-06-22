@@ -258,6 +258,28 @@ almostgradle.setup {
 }
 ```
 
+## Access Transformer Publishing
+
+This feature publishes the default access transformer, so dependent mods can use it. The default path is the same
+one [ModDevGradle] loads automatically.
+
+If you defined a custom path, this option will not work.
+
+### Defaults:
+
+Enabled: `false`<br>
+Path: `src/main/resources/META-INF/accesstransformer.cfg`
+
+### Configuration:
+
+This feature can be enabled in the `setup` block.
+
+```kts
+almostgradle.setup {
+    accessTransformerPublish = true
+}
+```
+
 ## Process Resources
 
 This feature creates a `processResources` task to replace placeholders in resource files. Placeholders are defined as

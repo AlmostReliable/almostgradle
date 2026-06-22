@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 ## Unreleased
 
 - added options to download sources and Javadoc via IDEA Gradle plugin
+- added option to publish the default access transformer
 
 ## [2.2.0] - 2026-06-18
 
