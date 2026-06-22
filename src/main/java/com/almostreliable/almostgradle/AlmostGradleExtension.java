@@ -16,6 +16,7 @@ import org.gradle.api.tasks.SourceSet;
 import org.gradle.jvm.tasks.Jar;
 import org.gradle.jvm.toolchain.JavaLanguageVersion;
 import org.gradle.language.jvm.tasks.ProcessResources;
+import org.gradle.plugins.ide.idea.model.IdeaModel;
 
 import javax.inject.Inject;
 import java.util.Optional;
@@ -43,6 +44,8 @@ public abstract class AlmostGradleExtension {
         getJavaVersion().convention(DEFAULT_JAVA_VERSION);
         getMavenPublish().convention(false);
         getSplitRunDirs().convention(true);
+        getDownloadJavadoc().convention(false);
+        getDownloadSources().convention(true);
         getDataGen().set(providers.gradleProperty(NAME + ".datagen").map(s -> {
             if (s.equals("true")) return true;
             if (s.equals("false")) return false;
@@ -79,6 +82,10 @@ public abstract class AlmostGradleExtension {
     public abstract Property<Boolean> getMavenPublish();
 
     public abstract Property<Boolean> getSplitRunDirs();
+
+    public abstract Property<Boolean> getDownloadJavadoc();
+
+    public abstract Property<Boolean> getDownloadSources();
 
     public RecipeViewers getRecipeViewers() {
         return recipeViewers;
@@ -149,6 +156,7 @@ public abstract class AlmostGradleExtension {
 
         createProcessResourcesTask();
         applyBuildConfig();
+        applyIdeaDownloads();
         applyBasicMod();
         getTestSettings().apply();
         getRecipeViewers().createRuns();
@@ -296,6 +304,19 @@ public abstract class AlmostGradleExtension {
                 p.artifact(apiSources);
             });
         }
+    }
+
+    private void applyIdeaDownloads() {
+        if (getDownloadSources().get() || getDownloadJavadoc().get()) {
+            project.getPlugins().apply("idea");
+        }
+
+        project.getPlugins().withId("idea", plugin -> {
+            var idea = project.getExtensions().getByType(IdeaModel.class);
+            var module = idea.getModule();
+            module.setDownloadSources(getDownloadSources().get());
+            module.setDownloadJavadoc(getDownloadJavadoc().get());
+        });
     }
 
     private void applyApiJar() {

@@ -64,6 +64,7 @@ After specifying the required entries and calling the `setup` method, Almost Gra
     - set the base archive name to `modId-neoforge`
     - [set the Java version to `25`](#java-version)
     - [enable generation of a source JAR](#sources-jar)
+    - [configure IDEA dependency downloads](#idea-dependency-downloads)
 - [process resources](#process-resources)
     - collect all placeholder properties from resource files
     - validate if all placeholders have a respective property in the `gradle.properties` file
@@ -170,6 +171,27 @@ This feature can be disabled in the `setup` block.
 ```kts
 almostgradle.setup {
     withSourcesJar = false
+}
+```
+
+## IDEA Dependency Downloads
+
+This feature configures the [IDEA plugin] to download dependency sources and Javadoc for IntelliJ IDEA project files.
+When either option is enabled, Almost Gradle applies the IDEA plugin automatically.
+
+### Defaults:
+
+Download Sources: `true`<br>
+Download Javadoc: `false`
+
+### Configuration:
+
+These features can be toggled in the `setup` block.
+
+```kts
+almostgradle.setup {
+    downloadSources = false
+    downloadJavadoc = true
 }
 ```
 
@@ -764,4 +786,5 @@ prefixed with `test`.
 [discord]: https://discord.com/invite/ThFnwZCyYY
 [gradle plugin portal]: https://plugins.gradle.org/plugin/com.almostreliable.almostgradle
 [java plugin]: https://docs.gradle.org/current/userguide/java_plugin.html
+[idea plugin]: https://docs.gradle.org/current/userguide/idea_plugin.html
 [build config]: https://github.com/gmazzo/gradle-buildconfig-plugin
