@@ -3,6 +3,9 @@
 All notable changes to this project will be documented in this file.
 
 ## Unreleased
+- /
+
+## [2.3.0] - 2026-06-23
 
 - updated project Gradle version to 9.5.1 and Java to 25
 - added options to download sources and Javadoc via IDEA Gradle plugin
@@ -122,3 +125,4 @@ Initial release.
 [2.1.0]: https://github.com/AlmostReliable/almostgradle/releases/tag/v2.1.0
 [2.1.1]: https://github.com/AlmostReliable/almostgradle/releases/tag/v2.1.1
 [2.2.0]: https://github.com/AlmostReliable/almostgradle/releases/tag/v2.2.0
+[2.3.0]: https://github.com/AlmostReliable/almostgradle/releases/tag/v2.3.0
