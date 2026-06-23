@@ -2,8 +2,6 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog], and this project adheres to [Semantic Versioning].
-
 ## Unreleased
 
 - updated project Gradle version to 9.5.1 and Java to 25
@@ -108,14 +106,10 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 
 Initial release.
 
-<!-- Links -->
-[keep a changelog]: https://keepachangelog.com/en/1.0.0/
-[semantic versioning]: https://semver.org/spec/v2.0.0.html
-
 <!-- Versions -->
-[1.1.0]: https://github.com/AlmostReliable/almostgradle/releases/tag/v1.1.0
-[1.0.1]: https://github.com/AlmostReliable/almostgradle/releases/tag/v1.0.1
 [1.0.0]: https://github.com/AlmostReliable/almostgradle/releases/tag/v1.0.0
+[1.0.1]: https://github.com/AlmostReliable/almostgradle/releases/tag/v1.0.1
+[1.1.0]: https://github.com/AlmostReliable/almostgradle/releases/tag/v1.1.0
 [1.1.1]: https://github.com/AlmostReliable/almostgradle/releases/tag/v1.1.1
 [1.2.0]: https://github.com/AlmostReliable/almostgradle/releases/tag/v1.2.0
 [1.3.0]: https://github.com/AlmostReliable/almostgradle/releases/tag/v1.3.0
