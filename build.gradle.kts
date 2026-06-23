@@ -31,7 +31,7 @@ dependencies {
 
 tasks {
     withType<JavaCompile> {
-        options.release = 25
+        options.release = 21
     }
     withType<Jar> {
         if (name == "javadocJar") {
