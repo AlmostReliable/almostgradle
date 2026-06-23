@@ -35,7 +35,6 @@ public class Utils {
     public static Configuration createLocalRuntime(Project project, String classPathConfigName, @Nullable String prefix) {
         String name = prefix == null ? "localRuntime" : prefix + "LocalRuntime";
         return project.getConfigurations().create(name, c -> {
-            c.setVisible(true);
             c.setCanBeResolved(true);
             c.setCanBeConsumed(false);
             project.getConfigurations().getByName(classPathConfigName).extendsFrom(c);
@@ -45,7 +44,6 @@ public class Utils {
     public static void createLocalImplementation(Project project, String compileClassPathConfigName, String runtimeClassPathConfigName, @Nullable String prefix) {
         String name = prefix == null ? "localImplementation" : prefix + "LocalImplementation";
         project.getConfigurations().create(name, c -> {
-            c.setVisible(true);
             c.setCanBeResolved(true);
             c.setCanBeConsumed(false);
             project.getConfigurations().getByName(compileClassPathConfigName).extendsFrom(c);

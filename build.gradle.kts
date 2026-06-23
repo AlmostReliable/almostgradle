@@ -11,6 +11,12 @@ repositories {
     gradlePluginPortal()
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
 buildscript {
     dependencies {
         classpath(libs.buildconfig)
@@ -24,6 +30,9 @@ dependencies {
 }
 
 tasks {
+    withType<JavaCompile> {
+        options.release = 25
+    }
     withType<Jar> {
         if (name == "javadocJar") {
             enabled = false

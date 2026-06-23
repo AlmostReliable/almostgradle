@@ -173,7 +173,7 @@ jobs:
         uses: ./.github/actions/gradle-java
         with:
           java-distribution: "microsoft"
-          java-version: "21"
+          java-version: "25"
           branch: ${{ github.event_name == 'pull_request' && 'read_only' || github.ref }}
 
       - name: Assemble the JAR
@@ -319,7 +319,7 @@ jobs:
         uses: ./.github/actions/gradle-java
         with:
           java-distribution: "microsoft"
-          java-version: "21"
+          java-version: "25"
           branch: ${{ github.event_name == 'pull_request' && 'read_only' || github.ref }}
 
       - name: Release

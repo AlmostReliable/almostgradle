@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 
 ## Unreleased
 
+- updated project Gradle version to 9.5.1 and Java to 25
 - added options to download sources and Javadoc via IDEA Gradle plugin
 - added option to publish the default access transformer
 - added option to define custom file targets for process resources task

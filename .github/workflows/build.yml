@@ -32,4 +32,4 @@ jobs:
     uses: AlmostReliable/.github/.github/workflows/build.yml@main
     with:
       java-distribution: "microsoft"
-      java-version: "21"
+      java-version: "25"
