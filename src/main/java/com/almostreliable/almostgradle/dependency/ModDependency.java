@@ -35,7 +35,7 @@ public interface ModDependency {
 
         @Override
         public String defaultMavenRepo() {
-            return "https://maven.terraformersmc.com/";
+            return "https://repo.sleeping.town/";
         }
 
         @Override

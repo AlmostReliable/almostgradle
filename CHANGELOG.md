@@ -3,7 +3,8 @@
 All notable changes to this project will be documented in this file.
 
 ## Unreleased
-- /
+
+- updated default Maven repository for EMI recipe viewer dependency
 
 ## [2.3.0] - 2026-06-23
 
