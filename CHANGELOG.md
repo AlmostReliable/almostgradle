@@ -3,6 +3,9 @@
 All notable changes to this project will be documented in this file.
 
 ## Unreleased
+- /
+
+## [2.3.2] - 2026-08-10
 
 - fixed build fail with game tests when no tests are discovered
 
@@ -132,3 +135,4 @@ Initial release.
 [2.2.0]: https://github.com/AlmostReliable/almostgradle/releases/tag/v2.2.0
 [2.3.0]: https://github.com/AlmostReliable/almostgradle/releases/tag/v2.3.0
 [2.3.1]: https://github.com/AlmostReliable/almostgradle/releases/tag/v2.3.1
+[2.3.2]: https://github.com/AlmostReliable/almostgradle/releases/tag/v2.3.2
