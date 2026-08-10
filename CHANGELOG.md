@@ -3,7 +3,8 @@
 All notable changes to this project will be documented in this file.
 
 ## Unreleased
-- /
+
+- fixed build fail with game tests when no tests are discovered
 
 ## [2.3.1] - 2026-07-29
 

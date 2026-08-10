@@ -94,6 +94,10 @@ public abstract class TestSettings {
         var neoForge = project.getExtensions().getByType(NeoForgeExtension.class);
         var testSourceSet = java.getSourceSets().getByName("test");
 
+        project.getTasks().named("test", Test.class, test ->
+                test.getFailOnNoDiscoveredTests().set(false)
+        );
+
         neoForge.runs(runs ->
                 runs.create("gametest", run -> {
                     run.getType().set("gameTestServer");
@@ -110,7 +114,6 @@ public abstract class TestSettings {
         );
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     private void applyTestFramework() {
         if (!getTestFramework().get()) {
             return;
@@ -128,7 +131,6 @@ public abstract class TestSettings {
         testImpl.withDependencies(d -> d.add(dep));
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     private void applyJUnit() {
         if (!getJUnit().get()) {
             return;
