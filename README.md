@@ -462,7 +462,12 @@ the build directory to avoid crashes with file-based runtime mods. If you rely o
 they have to be loaded via Gradle.
 
 Since Minecraft 26.1, data generation has been split between client and server. Almost Gradle will create two different
-configurations for each type.
+configurations for each type. Each one writes into its own subfolder of the data generation path (`client` and `server`)
+and uses its own game directory, because a data generation run deletes all files in its output that it didn't generate
+itself. Both subfolders are added as resource directories.
+
+To run both at once, use the `runDatagen` Gradle task or the `DataGen (All)` IntelliJ run configuration. The server run
+starts after the client run has finished.
 
 ### Defaults:
 

@@ -4,10 +4,12 @@ import com.almostreliable.almostgradle.dependency.RecipeViewers;
 import com.github.gmazzo.buildconfig.BuildConfigExtension;
 import net.neoforged.moddevgradle.dsl.ModModel;
 import net.neoforged.moddevgradle.dsl.NeoForgeExtension;
+import net.neoforged.moddevgradle.dsl.RunModel;
 import org.gradle.api.Action;
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.BasePluginExtension;
+import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
@@ -18,8 +20,13 @@ import org.gradle.jvm.tasks.Jar;
 import org.gradle.jvm.toolchain.JavaLanguageVersion;
 import org.gradle.language.jvm.tasks.ProcessResources;
 import org.gradle.plugins.ide.idea.model.IdeaModel;
+import org.jetbrains.gradle.ext.Gradle;
+import org.jetbrains.gradle.ext.IdeaExtPlugin;
+import org.jetbrains.gradle.ext.ProjectSettings;
+import org.jetbrains.gradle.ext.RunConfigurationContainer;
 
 import javax.inject.Inject;
+import java.io.File;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -183,11 +190,12 @@ public abstract class AlmostGradleExtension {
     private void onPostRunConfigs() {
         log("📕Generated run configs:");
         var neoForge = project.getExtensions().getByType(NeoForgeExtension.class);
+        var tmpDir = project.getLayout().getBuildDirectory().dir("tmp").get().getAsFile().toPath();
         neoForge.getRuns().forEach(run -> {
             launchArgs.applyRunArguments(run);
 
-            var folderName = run.getIdeFolderName().get();
-            if (getSplitRunDirs().get() && !folderName.contains("tmp")) {
+            var isTmpRun = run.getGameDirectory().get().getAsFile().toPath().startsWith(tmpDir);
+            if (getSplitRunDirs().get() && !isTmpRun) {
                 var dir = run.getGameDirectory().get().dir(run.getName());
                 run.getGameDirectory().set(dir);
             }
@@ -237,42 +245,89 @@ public abstract class AlmostGradleExtension {
             generatedPath = "";
         }
 
-        mainSourceSet.resources(sourceSet -> {
-            sourceSet.srcDir(generatedPath);
-            sourceSet.exclude("**/.cache/**");
-        });
-        neoForge.getRuns().create("datagen_client", run -> {
-            run.clientData();
-            run.getGameDirectory().set(project.getLayout().getBuildDirectory().dir("tmp").get().dir("datagenRuns"));
-            run.getLoadedMods().set(Set.of(mainMod));
-            run.getIdeName().set("DataGen (Client)");
-            run.getProgramArguments().addAll(
-                    "--mod",
-                    getModId(),
-                    "--all",
-                    "--output",
-                    project.file(generatedPath).getAbsolutePath(),
-                    "--existing",
-                    project.file("src/main/resources").getAbsolutePath()
-            );
-        });
-        neoForge.getRuns().create("datagen_server", run -> {
-            run.serverData();
-            run.getGameDirectory().set(project.getLayout().getBuildDirectory().dir("tmp").get().dir("datagenRuns"));
-            run.getLoadedMods().set(Set.of(mainMod));
-            run.getIdeName().set("DataGen (Server)");
-            run.getProgramArguments().addAll(
-                    "--mod",
-                    getModId(),
-                    "--all",
-                    "--output",
-                    project.file(generatedPath).getAbsolutePath(),
-                    "--existing",
-                    project.file("src/main/resources").getAbsolutePath()
-            );
-        });
+        var generatedDir = project.file(generatedPath);
+        mainSourceSet.resources(sourceSet -> sourceSet.exclude("**/.cache/**"));
+
+        // each side needs its own output because a data run deletes every file in its output that it did not generate
+        createDataGenRun(
+                neoForge,
+                mainMod,
+                mainSourceSet,
+                generatedDir,
+                "client",
+                "DataGen (Client)",
+                RunModel::clientData
+        );
+        createDataGenRun(
+                neoForge,
+                mainMod,
+                mainSourceSet,
+                generatedDir,
+                "server",
+                "DataGen (Server)",
+                RunModel::serverData
+        );
+        createCombinedDataGenRun();
 
         log("📕Applied datagen output under: " + generatedPath.replace('/', '.'));
+    }
+
+    private void createDataGenRun(
+            NeoForgeExtension neoForge,
+            ModModel mainMod,
+            SourceSet mainSourceSet,
+            File generatedDir,
+            String side,
+            String ideName,
+            Action<RunModel> runType
+    ) {
+        var outputDir = new File(generatedDir, side);
+        mainSourceSet.getResources().srcDir(outputDir);
+
+        neoForge.getRuns().create("datagen_" + side, run -> {
+            runType.execute(run);
+            run.getGameDirectory()
+                    .set(project.getLayout().getBuildDirectory().dir("tmp").get().dir("datagenRuns").dir(side));
+            run.getLoadedMods().set(Set.of(mainMod));
+            run.getIdeName().set(ideName);
+            run.getProgramArguments().addAll(
+                    "--mod",
+                    getModId(),
+                    "--all",
+                    "--output",
+                    outputDir.getAbsolutePath(),
+                    "--existing",
+                    project.file("src/main/resources").getAbsolutePath()
+            );
+        });
+    }
+
+    private void createCombinedDataGenRun() {
+        var clientTask = "runDatagen_client";
+        var serverTask = "runDatagen_server";
+        var dataGenTask = project.getTasks().register("runDatagen", task -> {
+            task.setGroup("mod development");
+            task.setDescription("Runs the client and server data generation.");
+            task.dependsOn(clientTask, serverTask);
+        });
+        project.getTasks().configureEach(task -> {
+            if (task.getName().equals(serverTask)) {
+                task.mustRunAfter(clientTask);
+            }
+        });
+
+        var rootProject = project.getRootProject();
+        rootProject.getPlugins().withType(IdeaExtPlugin.class, plugin -> {
+            var ideaProject = rootProject.getExtensions().getByType(IdeaModel.class).getProject();
+            if (ideaProject == null) return;
+
+            var projectSettings = ((ExtensionAware) ideaProject).getExtensions().getByType(ProjectSettings.class);
+            var runConfigurations = ((ExtensionAware) projectSettings).getExtensions().getByType(RunConfigurationContainer.class);
+            var gradleRun = new Gradle("DataGen (All)");
+            gradleRun.setProject(project);
+            gradleRun.setTaskNames(List.of(dataGenTask.getName()));
+            runConfigurations.add(gradleRun);
+        });
     }
 
     private void applyBasics() {

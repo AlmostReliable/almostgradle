@@ -3,7 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 ## Unreleased
-- /
+
+- fixed client and server data generation runs deleting each other's output
+    - each run now writes into its own `client` or `server` subfolder of the data generation path
+    - existing generated files in the root of the data generation path have to be deleted once
+- fixed data generation and game test runs being split by the split run directories option
+- added `runDatagen` task and `DataGen (All)` IntelliJ run configuration to run both data generation runs
 
 ## [2.3.2] - 2026-08-10
 
