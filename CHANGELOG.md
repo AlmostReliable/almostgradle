@@ -3,6 +3,9 @@
 All notable changes to this project will be documented in this file.
 
 ## Unreleased
+- /
+
+## [2.4.0] - 2026-10-31
 
 - fixed client and server data generation runs deleting each other's output
     - each run now writes into its own `client` or `server` subfolder of the data generation path
@@ -141,3 +144,4 @@ Initial release.
 [2.3.0]: https://github.com/AlmostReliable/almostgradle/releases/tag/v2.3.0
 [2.3.1]: https://github.com/AlmostReliable/almostgradle/releases/tag/v2.3.1
 [2.3.2]: https://github.com/AlmostReliable/almostgradle/releases/tag/v2.3.2
+[2.4.0]: https://github.com/AlmostReliable/almostgradle/releases/tag/v2.4.0
